@@ -40,3 +40,15 @@ repos:
     rev: v0.950
     hooks:
     -   id: mypy
+-   repo: https://github.com/Lucas-C/pre-commit-hooks-lxml
+    rev: v1.1.0
+    hooks:
+    -   id: forbid-html-img-without-alt-text
+    -   id: forbid-non-std-html-attributes
+    -   id: html-tags-blacklist
+    -   id: html-attributes-blacklist
+-   repo: https://github.com/Lucas-C/pre-commit-hooks-nodejs
+    rev: v1.1.2
+    hooks:
+    -   id: htmlhint
+    #-   id: htmllint
