@@ -24,7 +24,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         daily_template = string.Template(''.join(f.readlines()))
 
     output_name = ''.join((
-        'html/',
+        'site/',
         datetime.datetime.now().strftime('%Y%m%d'),
         '.html',
     ))
