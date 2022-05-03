@@ -17,7 +17,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description='generate todays pic site')
     parser.add_argument('image', help='image to use instead of random')
     parser.add_argument(
-        '--template', default='template.html',
+        '--template',
+        default='template.html',
         help='html template file',
     )
     parser.add_argument('--day', help='html template file')
@@ -66,7 +67,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                     format_filename(
                         '/',
                         tomorrow,
-                    ), format_filename('/', today),
+                    ),
+                    format_filename('/', today),
                 )
         with open(tomorrow_text, 'w') as f:
             f.write(''.join(lines))
