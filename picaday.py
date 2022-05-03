@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import base64
 import datetime
 import json
 import os
@@ -41,11 +42,16 @@ def main(argv: Optional[List[str]] = None) -> int:
     with open(metadata_file) as f:
         metadata = json.load(f)
 
+    with open(f'used/{image}', 'rb') as b:
+        image_b64 = base64.b64encode(b.read()).decode('utf-8')
+
+    image_b64 = f'data:image/jpg;base64,{image_b64}'
+
     with open(output_name, 'w') as f:
         f.write(
             daily_template.substitute(
                 {
-                    'image_path': f'/used/{image}',
+                    'image': image_b64,
                     'alt': metadata['alt'],
                     'subtitle': metadata['subtitle'],
                 },
