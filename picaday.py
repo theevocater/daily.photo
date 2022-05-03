@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
+import argparse
 import datetime
+import json
 import os
 import random
 import string
@@ -7,11 +9,24 @@ from typing import List
 from typing import Optional
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def choose_image() -> str:
     unused_images = os.listdir('unused/')
-    image = unused_images[random.randint(0, len(unused_images))]
+    return unused_images[random.randint(0, len(unused_images))]
 
-    with open('template.html') as f:
+
+def main(argv: Optional[List[str]] = None) -> int:
+    parser = argparse.ArgumentParser(description='generate todays pic site')
+    parser.add_argument('image', help='image to use instead of random')
+    parser.add_argument(
+        '--template', default='template.html',
+        help='html template file',
+    )
+    args = parser.parse_args(argv)
+
+    # TODO harmonize this naming stuff
+    image = os.path.basename(args.image) or choose_image()
+
+    with open(args.template) as f:
         daily_template = string.Template(''.join(f.readlines()))
 
     output_name = ''.join((
@@ -19,19 +34,27 @@ def main(argv: Optional[List[str]] = None) -> int:
         datetime.datetime.now().strftime('%Y%m%d'),
         '.html',
     ))
+    metadata_file = os.path.join(
+        'unused',
+        os.path.splitext(image)[0] + '.json',
+    )
+    with open(metadata_file) as f:
+        metadata = json.load(f)
 
     with open(output_name, 'w') as f:
         f.write(
             daily_template.substitute(
                 {
                     'image_path': f'/used/{image}',
-                    'alt': 'woo',
-                    'subtitle': 'Test 123',
+                    'alt': metadata['alt'],
+                    'subtitle': metadata['subtitle'],
                 },
             ),
         )
 
-    os.rename(f'unused/{image}', f'used/{image}')
+    if os.path.exists(f'unused/{image}'):
+        os.rename(f'unused/{image}', f'used/{image}')
+
     return 0
 
 
