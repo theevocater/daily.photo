@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import argparse
-import base64
 import datetime
 import json
 import os
+import shutil
 import string
 from typing import List
 from typing import Optional
@@ -33,21 +33,21 @@ def main(argv: Optional[List[str]] = None) -> int:
     with open(metadata_file) as f:
         metadata = json.load(f)
 
-    with open(image, 'rb') as b:
-        image_b64 = base64.b64encode(b.read()).decode('utf-8')
-
-    image_b64 = f'data:image/jpg;base64,{image_b64}'
+    html_content = daily_template.substitute(
+        {
+            'image': f'images/{os.path.basename(image)}',
+            'alt': metadata['alt'],
+            'subtitle': metadata['subtitle'],
+        },
+    )
 
     with open(output_name, 'w') as f:
-        f.write(
-            daily_template.substitute(
-                {
-                    'image': image_b64,
-                    'alt': metadata['alt'],
-                    'subtitle': metadata['subtitle'],
-                },
-            ),
-        )
+        f.write(html_content)
+
+    with open('site/index.html', 'w') as f:
+        f.write(html_content)
+
+    shutil.copy(image, 'site/images/')
 
     return 0
 
