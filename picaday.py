@@ -4,15 +4,9 @@ import base64
 import datetime
 import json
 import os
-import random
 import string
 from typing import List
 from typing import Optional
-
-
-def choose_image() -> str:
-    unused_images = os.listdir('unused/')
-    return unused_images[random.randint(0, len(unused_images))]
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -24,8 +18,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    # TODO harmonize this naming stuff
-    image = os.path.basename(args.image) or choose_image()
+    image = args.image
 
     with open(args.template) as f:
         daily_template = string.Template(''.join(f.readlines()))
@@ -35,14 +28,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         datetime.datetime.now().strftime('%Y%m%d'),
         '.html',
     ))
-    metadata_file = os.path.join(
-        'unused',
-        os.path.splitext(image)[0] + '.json',
-    )
+    metadata_file = os.path.splitext(image)[0] + '.json'
+
     with open(metadata_file) as f:
         metadata = json.load(f)
 
-    with open(f'used/{image}', 'rb') as b:
+    with open(image, 'rb') as b:
         image_b64 = base64.b64encode(b.read()).decode('utf-8')
 
     image_b64 = f'data:image/jpg;base64,{image_b64}'
@@ -57,9 +48,6 @@ def main(argv: Optional[List[str]] = None) -> int:
                 },
             ),
         )
-
-    if os.path.exists(f'unused/{image}'):
-        os.rename(f'unused/{image}', f'used/{image}')
 
     return 0
 
