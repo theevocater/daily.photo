@@ -7,10 +7,34 @@ import shutil
 import string
 from typing import List
 from typing import Optional
+from typing import TypedDict
 
 
 def format_filename(output_dir: str, day: datetime.datetime) -> str:
     return os.path.join(output_dir, f'{day.strftime("%Y%m%d")}.html')
+
+
+class TemplateSubstitutions(TypedDict):
+    yesterday: str
+    tomorrow: str
+    image: str
+    alt: str
+    subtitle: str
+
+
+def generate_html(
+    template_filename: str,
+    data: TemplateSubstitutions,
+    output_filename: str,
+) -> None:
+    with open(template_filename) as f:
+        daily_template = string.Template(''.join(f.readlines()))
+
+    # TODO check that this fully substituted or use better templating
+    html_content = daily_template.substitute(data)
+
+    with open(output_filename, 'w') as f:
+        f.write(html_content)
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -21,7 +45,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         default='template.html',
         help='html template file',
     )
-    parser.add_argument('--day', help='html template file')
+    parser.add_argument('--day', help='day in YYYMMDD format to generate')
+    parser.add_argument(
+        '--index',
+        action='store_true',
+        help='Generate index.html instead of day.html',
+    )
     args = parser.parse_args(argv)
 
     output_dir = 'docs'
@@ -34,11 +63,6 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
-
-    with open(args.template) as f:
-        daily_template = string.Template(''.join(f.readlines()))
-
-    output_name = format_filename(output_dir, today)
 
     metadata_file = os.path.splitext(image)[0] + '.json'
 
@@ -76,7 +100,13 @@ def main(argv: Optional[List[str]] = None) -> int:
     else:
         tomorrow_text = 'index.html'
 
-    html_content = daily_template.substitute(
+    if args.index:
+        output_name = os.path.join(output_dir, 'index.html')
+    else:
+        output_name = format_filename(output_dir, today)
+
+    generate_html(
+        args.template,
         {
             'yesterday': yesterday_text,
             'tomorrow': tomorrow_text,
@@ -84,14 +114,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             'alt': metadata['alt'],
             'subtitle': metadata['subtitle'],
         },
+        output_name,
     )
-
-    with open(output_name, 'w') as f:
-        f.write(html_content)
-
-    if today.strftime('%Y%m%d') == datetime.datetime.now().strftime('%Y%m%d'):
-        with open(os.path.join(output_dir, 'index.html'), 'w') as f:
-            f.write(html_content)
 
     shutil.copy(image, os.path.join(output_dir, 'images/'))
 
