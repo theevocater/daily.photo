@@ -14,6 +14,10 @@ def format_filename(output_dir: str, day: datetime.datetime) -> str:
     return os.path.join(output_dir, f'{day.strftime("%Y%m%d")}.html')
 
 
+YESTERDAY_ANCHOR = '<a href="{}">&lt;-</a>'
+TOMORROW_ANCHOR = '<a href="{}">-&gt;</a>'
+
+
 class TemplateSubstitutions(TypedDict):
     yesterday: str
     tomorrow: str
@@ -35,6 +39,33 @@ def generate_html(
 
     with open(output_filename, 'w') as f:
         f.write(html_content)
+
+
+def generate_tomorrow_anchor(
+    *,
+    output_dir: str,
+    today: datetime.datetime,
+    tomorrow: datetime.datetime,
+    anchor_format: str,
+) -> str:
+    file_to_fix = format_filename(output_dir, tomorrow)
+
+    today_uri = format_filename('/', today)
+
+    tomorrow_uri = format_filename('/', tomorrow)
+
+    if os.path.exists(file_to_fix):
+        with open(file_to_fix) as f:
+            lines: List[str] = []
+            for line in f:
+                lines += line.replace(tomorrow_uri, today_uri)
+        with open(file_to_fix, 'w') as f:
+            f.write(''.join(lines))
+        tomorrow_text = tomorrow_uri
+    else:
+        tomorrow_text = 'index.html'
+
+    return anchor_format.format(tomorrow_text)
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -82,23 +113,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     else:
         yesterday_text = format_filename('/', today)
 
-    tomorrow_text = format_filename(output_dir, tomorrow)
-    if os.path.exists(tomorrow_text):
-        with open(tomorrow_text) as f:
-            lines = []
-            for line in f:
-                lines += line.replace(
-                    format_filename(
-                        '/',
-                        tomorrow,
-                    ),
-                    format_filename('/', today),
-                )
-        with open(tomorrow_text, 'w') as f:
-            f.write(''.join(lines))
-        tomorrow_text = format_filename('/', tomorrow)
-    else:
-        tomorrow_text = 'index.html'
+    tomorrow_link = generate_tomorrow_anchor(
+        output_dir=output_dir,
+        today=today,
+        tomorrow=tomorrow,
+        anchor_format=TOMORROW_ANCHOR,
+    )
 
     if args.index:
         output_name = os.path.join(output_dir, 'index.html')
@@ -108,8 +128,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     generate_html(
         args.template,
         {
-            'yesterday': yesterday_text,
-            'tomorrow': tomorrow_text,
+            'yesterday': YESTERDAY_ANCHOR.format(yesterday_text),
+            'tomorrow': tomorrow_link,
             'image': f'images/{os.path.basename(image)}',
             'alt': metadata['alt'],
             'subtitle': metadata['subtitle'],
