@@ -117,6 +117,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     else:
         yesterday_text = today_uri
 
+    yesterday_text = YESTERDAY_ANCHOR.format(yesterday_text)
+
     tomorrow_link = generate_tomorrow_anchor(
         output_dir=output_dir,
         today=today,
@@ -132,7 +134,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     generate_html(
         args.template,
         {
-            'yesterday': YESTERDAY_ANCHOR.format(yesterday_text),
+            'yesterday': yesterday_text,
             'tomorrow': tomorrow_link,
             'image': f'images/{os.path.basename(image)}',
             'alt': metadata['alt'],
