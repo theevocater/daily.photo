@@ -41,33 +41,6 @@ def generate_html(
         f.write(html_content)
 
 
-def generate_tomorrow_anchor(
-    *,
-    output_dir: str,
-    today: datetime.datetime,
-    tomorrow: datetime.datetime,
-    anchor_format: str,
-) -> str:
-    file_to_fix = format_filename(output_dir, tomorrow)
-
-    today_uri = format_filename('/', today)
-
-    tomorrow_uri = format_filename('/', tomorrow)
-
-    if os.path.exists(file_to_fix):
-        with open(file_to_fix) as f:
-            lines: List[str] = []
-            for line in f:
-                lines += line.replace(tomorrow_uri, today_uri)
-        with open(file_to_fix, 'w') as f:
-            f.write(''.join(lines))
-        tomorrow_text = tomorrow_uri
-    else:
-        tomorrow_text = 'index.html'
-
-    return anchor_format.format(tomorrow_text)
-
-
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description='generate todays pic site')
     parser.add_argument('image', help='image to use instead of random')
@@ -81,6 +54,16 @@ def main(argv: Optional[List[str]] = None) -> int:
         '--index',
         action='store_true',
         help='Generate index.html instead of day.html',
+    )
+    parser.add_argument(
+        '--no-next',
+        action='store_true',
+        help='Dont add a next arrow',
+    )
+    parser.add_argument(
+        '--no-prev',
+        action='store_true',
+        help='Dont add a back arrow',
     )
     args = parser.parse_args(argv)
 
@@ -100,42 +83,31 @@ def main(argv: Optional[List[str]] = None) -> int:
     with open(metadata_file) as f:
         metadata = json.load(f)
 
-    file_to_fix = format_filename(output_dir, yesterday)
-
-    yesterday_uri = format_filename('/', yesterday)
-
-    today_uri = format_filename('/', today)
-
-    if os.path.exists(file_to_fix):
-        with open(file_to_fix) as f:
-            lines: List[str] = []
-            for line in f:
-                lines += line.replace('index.html', today_uri)
-        with open(file_to_fix, 'w') as f:
-            f.write(''.join(lines))
-        yesterday_text = yesterday_uri
-    else:
-        yesterday_text = today_uri
-
-    yesterday_text = YESTERDAY_ANCHOR.format(yesterday_text)
-
-    tomorrow_link = generate_tomorrow_anchor(
-        output_dir=output_dir,
-        today=today,
-        tomorrow=tomorrow,
-        anchor_format=TOMORROW_ANCHOR,
+    yesterday_text = (
+        '&lt;-'
+        if args.no_prev
+        else YESTERDAY_ANCHOR.format(
+            format_filename('/', yesterday),
+        )
     )
 
     if args.index:
+        tomorrow_text = '-&gt;'
         output_name = os.path.join(output_dir, 'index.html')
     else:
+        if args.no_next:
+            tomorrow_text = TOMORROW_ANCHOR.format('/')
+        else:
+            tomorrow_text = TOMORROW_ANCHOR.format(
+                format_filename('/', tomorrow),
+            )
         output_name = format_filename(output_dir, today)
 
     generate_html(
         args.template,
         {
             'yesterday': yesterday_text,
-            'tomorrow': tomorrow_link,
+            'tomorrow': tomorrow_text,
             'image': f'images/{os.path.basename(image)}',
             'alt': metadata['alt'],
             'subtitle': metadata['subtitle'],
