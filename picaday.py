@@ -90,17 +90,16 @@ def main(argv: Optional[List[str]] = None) -> int:
             format_filename('/', yesterday),
         )
     )
+    if args.no_next or args.index:
+        tomorrow_text = '-&gt;'
+    else:
+        tomorrow_text = TOMORROW_ANCHOR.format(
+            format_filename('/', tomorrow),
+        )
 
     if args.index:
-        tomorrow_text = '-&gt;'
         output_name = os.path.join(output_dir, 'index.html')
     else:
-        if args.no_next:
-            tomorrow_text = TOMORROW_ANCHOR.format('/')
-        else:
-            tomorrow_text = TOMORROW_ANCHOR.format(
-                format_filename('/', tomorrow),
-            )
         output_name = format_filename(output_dir, today)
 
     generate_html(
