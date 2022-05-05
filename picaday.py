@@ -100,18 +100,22 @@ def main(argv: Optional[List[str]] = None) -> int:
     with open(metadata_file) as f:
         metadata = json.load(f)
 
-    # TODO this code is bad
-    yesterday_text = format_filename(output_dir, yesterday)
-    if os.path.exists(yesterday_text):
-        with open(yesterday_text) as f:
+    file_to_fix = format_filename(output_dir, yesterday)
+
+    yesterday_uri = format_filename('/', yesterday)
+
+    today_uri = format_filename('/', today)
+
+    if os.path.exists(file_to_fix):
+        with open(file_to_fix) as f:
             lines: List[str] = []
             for line in f:
-                lines += line.replace('index.html', format_filename('', today))
-        with open(yesterday_text, 'w') as f:
+                lines += line.replace('index.html', today_uri)
+        with open(file_to_fix, 'w') as f:
             f.write(''.join(lines))
-        yesterday_text = format_filename('/', yesterday)
+        yesterday_text = yesterday_uri
     else:
-        yesterday_text = format_filename('/', today)
+        yesterday_text = today_uri
 
     tomorrow_link = generate_tomorrow_anchor(
         output_dir=output_dir,
