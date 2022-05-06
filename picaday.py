@@ -24,6 +24,9 @@ class TemplateSubstitutions(TypedDict):
     image: str
     alt: str
     subtitle: str
+    date: str
+    camera: str
+    film: str
 
 
 def generate_html(
@@ -39,6 +42,12 @@ def generate_html(
 
     with open(output_filename, 'w') as f:
         f.write(html_content)
+
+
+def photo_date(date: str) -> str:
+    if not date:
+        return ''
+    return datetime.datetime.strptime(date, '%Y%m%d').strftime('%B %d, %Y')
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -110,6 +119,9 @@ def main(argv: Optional[List[str]] = None) -> int:
             'image': f'images/{os.path.basename(image)}',
             'alt': metadata['alt'],
             'subtitle': metadata['subtitle'],
+            'date': photo_date(metadata.get('date', '')),
+            'camera': metadata.get('camera', ''),
+            'film': metadata.get('film', ''),
         },
         output_name,
     )
