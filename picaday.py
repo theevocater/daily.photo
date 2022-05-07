@@ -13,10 +13,6 @@ def format_filename(output_dir: str, day: datetime.datetime) -> str:
     return os.path.join(output_dir, f'{day.strftime("%Y%m%d")}.html')
 
 
-YESTERDAY_ANCHOR = '<a href="{}">&lt;-</a>'
-TOMORROW_ANCHOR = '<a href="{}">-&gt;</a>'
-
-
 class TemplateSubstitutions(TypedDict):
     yesterday: str
     tomorrow: str
@@ -90,7 +86,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
 
-    metadata_file = os.path.join(
+    metadata_file = args.metadata or os.path.join(
         'metadata',
         os.path.splitext(os.path.basename(image))[0] + '.json',
     )
@@ -98,17 +94,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     with open(metadata_file) as f:
         metadata = json.load(f)
 
-    yesterday_text = (
-        '&lt;-'
-        if args.no_prev
-        else YESTERDAY_ANCHOR.format(
+    if args.no_prev:
+        yesterday_text = '&lt;-'
+    else:
+        yesterday_text = '<a href="{}">&lt;-</a>'.format(
             format_filename('/', yesterday),
         )
-    )
+
     if args.no_next or args.index:
         tomorrow_text = '-&gt;'
     else:
-        tomorrow_text = TOMORROW_ANCHOR.format(
+        tomorrow_text = '<a href="{}">-&gt;</a>'.format(
             format_filename('/', tomorrow),
         )
 
