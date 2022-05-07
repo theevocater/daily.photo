@@ -3,7 +3,6 @@ import argparse
 import datetime
 import json
 import os
-import shutil
 import string
 from typing import List
 from typing import Optional
@@ -58,6 +57,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         default='template.html',
         help='html template file',
     )
+    parser.add_argument(
+        '--metadata',
+        help='image metadata json. defaults to metadata/imagename.json',
+    )
     parser.add_argument('--day', help='day in YYYMMDD format to generate')
     parser.add_argument(
         '--index',
@@ -87,7 +90,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
 
-    metadata_file = os.path.splitext(image)[0] + '.json'
+    metadata_file = os.path.join(
+        'metadata',
+        os.path.splitext(os.path.basename(image))[0] + '.json',
+    )
 
     with open(metadata_file) as f:
         metadata = json.load(f)
@@ -125,8 +131,6 @@ def main(argv: Optional[List[str]] = None) -> int:
         },
         output_name,
     )
-
-    shutil.copy(image, os.path.join(output_dir, 'images/'))
 
     return 0
 

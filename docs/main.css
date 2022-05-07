@@ -7,6 +7,7 @@
 img {
   min-width: 600px;
   max-width: 80%;
+  max-height: 1400px;
   margin: .5em;
   border: 3em solid white;
 }
