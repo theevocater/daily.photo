@@ -4,7 +4,6 @@ import datetime
 import json
 import os
 import string
-from typing import Dict
 from typing import List
 from typing import Optional
 from typing import TypedDict
@@ -52,11 +51,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument(
         '--template',
         default='template.html',
-        help='html template file',
+        help='html template file'
     )
     parser.add_argument(
         '--metadata',
-        help='image metadata json. defaults to metadata/imagename.json',
+        help='image metadata json. defaults to metadata/imagename.json'
     )
     parser.add_argument('--day', help='day in YYYMMDD format to generate')
     parser.add_argument(
