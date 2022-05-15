@@ -107,10 +107,6 @@ def main(argv: Optional[List[str]] = None) -> int:
         default='template.html',
         help='html template file',
     )
-    parser.add_argument(
-        '--metadata',
-        help='image metadata json. defaults to metadata/imagename.json',
-    )
     parser.add_argument('--day', help='day in YYYMMDD format to generate')
     parser.add_argument(
         '--index',
@@ -131,7 +127,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     today = datetime.datetime.strptime(args.day, '%Y%m%d')
 
-    metadata_file = args.metadata or os.path.join(
+    metadata_file = os.path.join(
         'metadata',
         os.path.splitext(os.path.basename(args.image))[0] + '.json',
     )
