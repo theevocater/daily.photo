@@ -47,7 +47,7 @@ def photo_date(date: str) -> str:
 
 def generate_day(
     *,
-    day: str,
+    today: datetime.datetime,
     image: str,
     metadata_file: str,
     template: str,
@@ -57,18 +57,8 @@ def generate_day(
 ) -> int:
     output_dir = 'docs'
 
-    if day:
-        today = datetime.datetime.strptime(day, '%Y%m%d')
-    else:
-        today = datetime.datetime.now()
-
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
-
-    metadata_file = metadata_file or os.path.join(
-        'metadata',
-        os.path.splitext(os.path.basename(image))[0] + '.json',
-    )
 
     with open(metadata_file) as f:
         metadata = json.load(f)
@@ -139,11 +129,18 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    today = datetime.datetime.strptime(args.day, '%Y%m%d')
+
+    metadata_file = args.metadata or os.path.join(
+        'metadata',
+        os.path.splitext(os.path.basename(args.image))[0] + '.json',
+    )
+
     return generate_day(
-        day=args.day,
+        today=today,
         image=args.image,
         index=args.index,
-        metadata_file=args.metadata,
+        metadata_file=metadata_file,
         no_next=args.no_next,
         no_prev=args.no_prev,
         template=args.template,
