@@ -45,6 +45,70 @@ def photo_date(date: str) -> str:
     return datetime.datetime.strptime(date, '%Y%m%d').strftime('%B %d, %Y')
 
 
+def generate_day(
+    *,
+    day: str,
+    image: str,
+    metadata_file: str,
+    template: str,
+    index: bool,
+    no_next: bool,
+    no_prev: bool,
+) -> int:
+    output_dir = 'docs'
+
+    if day:
+        today = datetime.datetime.strptime(day, '%Y%m%d')
+    else:
+        today = datetime.datetime.now()
+
+    yesterday = today - datetime.timedelta(days=1)
+    tomorrow = today + datetime.timedelta(days=1)
+
+    metadata_file = metadata_file or os.path.join(
+        'metadata',
+        os.path.splitext(os.path.basename(image))[0] + '.json',
+    )
+
+    with open(metadata_file) as f:
+        metadata = json.load(f)
+
+    if no_prev:
+        yesterday_text = '&lt;-'
+    else:
+        yesterday_text = '<a href="{}">&lt;-</a>'.format(
+            format_filename('/', yesterday),
+        )
+
+    if no_next or index:
+        tomorrow_text = '-&gt;'
+    else:
+        tomorrow_text = '<a href="{}">-&gt;</a>'.format(
+            format_filename('/', tomorrow),
+        )
+
+    if index:
+        output_name = os.path.join(output_dir, 'index.html')
+    else:
+        output_name = format_filename(output_dir, today)
+
+    generate_html(
+        template,
+        {
+            'yesterday': yesterday_text,
+            'tomorrow': tomorrow_text,
+            'image': f'images/{os.path.basename(image)}',
+            'alt': metadata['alt'],
+            'subtitle': metadata['subtitle'],
+            'date': photo_date(metadata.get('date', '')),
+            'camera': metadata.get('camera', ''),
+            'film': metadata.get('film', ''),
+        },
+        output_name,
+    )
+    return 0
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description='generate todays pic site')
     parser.add_argument('image', help='image to use instead of random')
@@ -75,60 +139,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    output_dir = 'docs'
-
-    image = args.image
-    if args.day:
-        today = datetime.datetime.strptime(args.day, '%Y%m%d')
-    else:
-        today = datetime.datetime.now()
-
-    yesterday = today - datetime.timedelta(days=1)
-    tomorrow = today + datetime.timedelta(days=1)
-
-    metadata_file = args.metadata or os.path.join(
-        'metadata',
-        os.path.splitext(os.path.basename(image))[0] + '.json',
+    return generate_day(
+        day=args.day,
+        image=args.image,
+        index=args.index,
+        metadata_file=args.metadata,
+        no_next=args.no_next,
+        no_prev=args.no_prev,
+        template=args.template,
     )
-
-    with open(metadata_file) as f:
-        metadata = json.load(f)
-
-    if args.no_prev:
-        yesterday_text = '&lt;-'
-    else:
-        yesterday_text = '<a href="{}">&lt;-</a>'.format(
-            format_filename('/', yesterday),
-        )
-
-    if args.no_next or args.index:
-        tomorrow_text = '-&gt;'
-    else:
-        tomorrow_text = '<a href="{}">-&gt;</a>'.format(
-            format_filename('/', tomorrow),
-        )
-
-    if args.index:
-        output_name = os.path.join(output_dir, 'index.html')
-    else:
-        output_name = format_filename(output_dir, today)
-
-    generate_html(
-        args.template,
-        {
-            'yesterday': yesterday_text,
-            'tomorrow': tomorrow_text,
-            'image': f'images/{os.path.basename(image)}',
-            'alt': metadata['alt'],
-            'subtitle': metadata['subtitle'],
-            'date': photo_date(metadata.get('date', '')),
-            'camera': metadata.get('camera', ''),
-            'film': metadata.get('film', ''),
-        },
-        output_name,
-    )
-
-    return 0
 
 
 if __name__ == '__main__':
