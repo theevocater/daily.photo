@@ -137,7 +137,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.new:
         if os.path.exists(f'{output_dir}/{args.new}.html'):
             print(f'{args.new} already exists!')
-            return -1
+            return 1
         new_image = choose_new(args.new)
         metadata_file = get_metadata_filename(metadata_dir, new_image)
         shutil.move(
