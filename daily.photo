@@ -124,6 +124,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
 
         if config['dates'][-1] == date:
+            # Last day we need to generate the index and no anchor
             no_next = True
             ret = generate_day(
                 today=today,
