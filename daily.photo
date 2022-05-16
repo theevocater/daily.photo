@@ -45,76 +45,44 @@ def photo_date(date: str) -> str:
     return datetime.datetime.strptime(date, '%Y%m%d').strftime('%B %d, %Y')
 
 
-def main(argv: Optional[List[str]] = None) -> int:
-    parser = argparse.ArgumentParser(description='generate todays pic site')
-    parser.add_argument('image', help='image to use instead of random')
-    parser.add_argument(
-        '--template',
-        default='template.html',
-        help='html template file',
-    )
-    parser.add_argument(
-        '--metadata',
-        help='image metadata json. defaults to metadata/imagename.json',
-    )
-    parser.add_argument('--day', help='day in YYYMMDD format to generate')
-    parser.add_argument(
-        '--index',
-        action='store_true',
-        help='Generate index.html instead of day.html',
-    )
-    parser.add_argument(
-        '--no-next',
-        action='store_true',
-        help='Dont add a next arrow',
-    )
-    parser.add_argument(
-        '--no-prev',
-        action='store_true',
-        help='Dont add a back arrow',
-    )
-    args = parser.parse_args(argv)
-
-    output_dir = 'docs'
-
-    image = args.image
-    if args.day:
-        today = datetime.datetime.strptime(args.day, '%Y%m%d')
-    else:
-        today = datetime.datetime.now()
-
+def generate_day(
+    *,
+    today: datetime.datetime,
+    image: str,
+    metadata_file: str,
+    template: str,
+    index: bool,
+    no_next: bool,
+    no_prev: bool,
+    output_dir: str,
+) -> int:
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
-
-    metadata_file = args.metadata or os.path.join(
-        'metadata',
-        os.path.splitext(os.path.basename(image))[0] + '.json',
-    )
 
     with open(metadata_file) as f:
         metadata = json.load(f)
 
-    if args.no_prev:
+    if no_prev:
         yesterday_text = '&lt;-'
     else:
         yesterday_text = '<a href="{}">&lt;-</a>'.format(
             format_filename('/', yesterday),
         )
 
-    if args.no_next or args.index:
+    if no_next or index:
         tomorrow_text = '-&gt;'
     else:
         tomorrow_text = '<a href="{}">-&gt;</a>'.format(
             format_filename('/', tomorrow),
         )
 
-    if args.index:
+    if index:
         output_name = os.path.join(output_dir, 'index.html')
     else:
         output_name = format_filename(output_dir, today)
 
     generate_html(
-        args.template,
+        template,
         {
             'yesterday': yesterday_text,
             'tomorrow': tomorrow_text,
@@ -127,8 +95,64 @@ def main(argv: Optional[List[str]] = None) -> int:
         },
         output_name,
     )
-
     return 0
+
+
+def main(argv: Optional[List[str]] = None) -> int:
+    parser = argparse.ArgumentParser(description='generate todays pic site')
+    parser.add_argument(
+        '--config',
+        help='name of config file or config.json by default',
+    )
+    args = parser.parse_args(argv)
+
+    # constant metadata
+    config = json.load(open(args.config or 'config.json'))
+
+    output_dir = config['output_dir']
+
+    template = config['template']
+
+    no_prev = True
+    no_next = False
+    for date in config['dates']:
+        today = datetime.datetime.strptime(date[0], '%Y%m%d')
+        image = date[1]
+        metadata_file = os.path.join(
+            config['metadata_dir'],
+            os.path.splitext(os.path.basename(image))[0] + '.json',
+        )
+
+        if config['dates'][-1] == date:
+            # Last day we need to generate the index and no anchor
+            no_next = True
+            ret = generate_day(
+                today=today,
+                image=image,
+                index=True,
+                metadata_file=metadata_file,
+                no_next=no_next,
+                no_prev=no_prev,
+                template=template,
+                output_dir=output_dir,
+            )
+
+        ret = generate_day(
+            today=today,
+            image=image,
+            index=False,
+            metadata_file=metadata_file,
+            no_next=no_next,
+            no_prev=no_prev,
+            template=template,
+            output_dir=output_dir,
+        )
+
+        if no_prev:
+            # only true on first go around
+            no_prev = False
+
+    return ret
 
 
 if __name__ == '__main__':
