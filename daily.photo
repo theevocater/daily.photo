@@ -3,6 +3,8 @@ import argparse
 import datetime
 import json
 import os
+import random
+import shutil
 import string
 from typing import List
 from typing import Optional
@@ -98,30 +100,64 @@ def generate_day(
     return 0
 
 
+def get_metadata_filename(metadata_dir: str, image: str) -> str:
+    return os.path.join(
+        metadata_dir,
+        os.path.splitext(os.path.basename(image))[0] + '.json',
+    )
+
+
+def choose_new(date: str) -> str:
+    # get a list of image files
+    new_image = random.choice(
+        [image for image in os.listdir('converted') if image[-4:] != 'json'],
+    )
+    return new_image
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description='generate todays pic site')
     parser.add_argument(
         '--config',
-        help='name of config file or config.json by default',
+        help='Path to config file. defaults to ./config.json',
+    )
+    parser.add_argument(
+        '--new',
+        help='Choose and add new from converted/ for YYYYMMDD',
     )
     args = parser.parse_args(argv)
 
     # constant metadata
-    config = json.load(open(args.config or 'config.json'))
-
+    config_file = args.config or 'config.json'
+    config = json.load(open(config_file))
     output_dir = config['output_dir']
-
     template = config['template']
+    metadata_dir = config['metadata_dir']
+
+    if args.new:
+        if os.path.exists(f'{output_dir}/{args.new}.html'):
+            print(f'{args.new} already exists!')
+            return 1
+        new_image = choose_new(args.new)
+        metadata_file = get_metadata_filename(metadata_dir, new_image)
+        shutil.move(
+            f'converted/{new_image}',
+            f'{output_dir}/images/{new_image}',
+        )
+        shutil.move(
+            f'converted/{os.path.basename(metadata_file)}',
+            metadata_file,
+        )
+        config['dates'].append([args.new, new_image])
+        with open(config_file, 'w') as c:
+            json.dump(config, c, sort_keys=True, indent=4)
 
     no_prev = True
     no_next = False
     for date in config['dates']:
         today = datetime.datetime.strptime(date[0], '%Y%m%d')
         image = date[1]
-        metadata_file = os.path.join(
-            config['metadata_dir'],
-            os.path.splitext(os.path.basename(image))[0] + '.json',
-        )
+        metadata_file = get_metadata_filename(metadata_dir, image)
 
         if config['dates'][-1] == date:
             # Last day we need to generate the index and no anchor
