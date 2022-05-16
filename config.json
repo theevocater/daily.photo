@@ -61,7 +61,8 @@
       "000992580023.jpg"
     ]
   ],
-  "images": "docs/images",
-  "metadata": "metadata",
+  "images_dir": "docs/images",
+  "metadata_dir": "metadata",
+  "output_dir": "docs",
   "template": "template.html"
 }

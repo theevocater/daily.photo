@@ -54,9 +54,8 @@ def generate_day(
     index: bool,
     no_next: bool,
     no_prev: bool,
+    output_dir: str,
 ) -> int:
-    output_dir = 'docs'
-
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
 
@@ -123,24 +122,43 @@ def main(argv: Optional[List[str]] = None) -> int:
         action='store_true',
         help='Dont add a back arrow',
     )
+    parser.add_argument(
+        '--config',
+        help='name of config file',
+    )
     args = parser.parse_args(argv)
 
-    today = datetime.datetime.strptime(args.day, '%Y%m%d')
+    # constant metadata
+    config = json.load(open(args.config or 'config.json'))
 
     metadata_file = os.path.join(
-        'metadata',
+        config['metadata_dir'],
         os.path.splitext(os.path.basename(args.image))[0] + '.json',
     )
 
-    return generate_day(
+    output_dir = config['output_dir']
+
+    template = config['template']
+
+    # per day data
+    today = datetime.datetime.strptime(args.day, '%Y%m%d')
+    image = args.image
+    index = args.index
+    no_next = args.no_next
+    no_prev = args.no_prev
+
+    ret = generate_day(
         today=today,
-        image=args.image,
-        index=args.index,
+        image=image,
+        index=index,
         metadata_file=metadata_file,
-        no_next=args.no_next,
-        no_prev=args.no_prev,
-        template=args.template,
+        no_next=no_next,
+        no_prev=no_prev,
+        template=template,
+        output_dir=output_dir,
     )
+
+    return ret
 
 
 if __name__ == '__main__':
