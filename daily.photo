@@ -150,7 +150,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
         config['dates'].append([args.new, new_image])
         with open(config_file, 'w') as c:
-            json.dump(config, c, sort_keys=True, indent=4)
+            json.dump(config, c, sort_keys=True, indent=2)
 
     no_prev = True
     no_next = False
