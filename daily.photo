@@ -11,6 +11,34 @@ from typing import Optional
 from typing import TypedDict
 
 
+RSS_FEED_HEADER = """
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title>Daily Photo</title>
+  <link href="https://daily.photo"/>
+  <updated>{date}</updated>
+  <author>
+    <name>Jake Kaufman</name>
+    <email>me@jake.computer</email>
+  </author>
+  <id>https://daily.photo/</id>
+"""
+
+RSS_FEED_ENTRY = """
+
+  <entry>
+    <title>{title}</title>
+    <link href="{link}"/>
+    <id>{link}</id>
+    <updated>{date}</updated>
+    <summary>{subtitle}</summary>
+  </entry>
+"""
+
+RSS_FEED_TRAILER = '\n</feed >\n'
+
+
 def format_filename(output_dir: str, day: datetime.datetime) -> str:
     return os.path.join(output_dir, f'{day.strftime("%Y%m%d")}.html')
 
@@ -57,7 +85,7 @@ def generate_day(
     no_next: bool,
     no_prev: bool,
     output_dir: str,
-) -> int:
+) -> str:
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
 
@@ -83,6 +111,9 @@ def generate_day(
     else:
         output_name = format_filename(output_dir, today)
 
+    raw_date = metadata.get('date')
+    date = photo_date(raw_date)
+
     generate_html(
         template,
         {
@@ -91,13 +122,19 @@ def generate_day(
             'image': f'images/{os.path.basename(image)}',
             'alt': metadata['alt'],
             'subtitle': metadata['subtitle'],
-            'date': photo_date(metadata.get('date', '')),
+            'date': date,
             'camera': metadata.get('camera', ''),
             'film': metadata.get('film', ''),
         },
         output_name,
     )
-    return 0
+
+    return RSS_FEED_ENTRY.format(
+        title=metadata['subtitle'],
+        link=f'https://daily.photo/{raw_date}.html',
+        date=date,
+        subtitle=metadata['alt'],
+    )
 
 
 def get_metadata_filename(metadata_dir: str, image: str) -> str:
@@ -154,6 +191,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     no_prev = True
     no_next = False
+    rss_feed = RSS_FEED_HEADER.format(date=datetime.datetime.now().isoformat())
+
     for date in config['dates']:
         today = datetime.datetime.strptime(date[0], '%Y%m%d')
         image = date[1]
@@ -162,7 +201,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         if config['dates'][-1] == date:
             # Last day we need to generate the index and no anchor
             no_next = True
-            ret = generate_day(
+            generate_day(
                 today=today,
                 image=image,
                 index=True,
@@ -173,7 +212,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 output_dir=output_dir,
             )
 
-        ret = generate_day(
+        rss_feed += generate_day(
             today=today,
             image=image,
             index=False,
@@ -188,7 +227,11 @@ def main(argv: Optional[List[str]] = None) -> int:
             # only true on first go around
             no_prev = False
 
-    return ret
+    rss_feed += RSS_FEED_TRAILER
+    with open('docs/rss.xml', 'w') as rss:
+        rss.write(rss_feed)
+
+    return 0
 
 
 if __name__ == '__main__':
