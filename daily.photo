@@ -11,7 +11,7 @@ from typing import Optional
 from typing import TypedDict
 
 
-RSS_FEED_HEADER = """
+RSS_FEED_HEADER = """\
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
@@ -26,7 +26,6 @@ RSS_FEED_HEADER = """
 """
 
 RSS_FEED_ENTRY = """
-
   <entry>
     <title>{title}</title>
     <link href="{link}"/>
