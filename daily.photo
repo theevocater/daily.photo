@@ -16,7 +16,7 @@ RSS_FEED_HEADER = """\
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title>Daily Photo</title>
-  <link href="https://daily.photo"/>
+  <link rel="self" href="https://daily.photo"/>
   <updated>{date}</updated>
   <author>
     <name>Jake Kaufman</name>
@@ -110,9 +110,6 @@ def generate_day(
     else:
         output_name = format_filename(output_dir, today)
 
-    raw_date = metadata.get('date')
-    date = photo_date(raw_date)
-
     generate_html(
         template,
         {
@@ -121,7 +118,7 @@ def generate_day(
             'image': f'images/{os.path.basename(image)}',
             'alt': metadata['alt'],
             'subtitle': metadata['subtitle'],
-            'date': date,
+            'date': photo_date(metadata.get('date')),
             'camera': metadata.get('camera', ''),
             'film': metadata.get('film', ''),
         },
@@ -130,8 +127,8 @@ def generate_day(
 
     return RSS_FEED_ENTRY.format(
         title=metadata['subtitle'],
-        link=f'https://daily.photo/{raw_date}.html',
-        date=date,
+        link=f'https://daily.photo/{today.strftime("%Y%m%d")}.html',
+        date=today.isoformat() + 'Z',  # TODO fix the TZs
         subtitle=metadata['alt'],
     )
 
@@ -190,7 +187,9 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     no_prev = True
     no_next = False
-    rss_feed = RSS_FEED_HEADER.format(date=datetime.datetime.now().isoformat())
+    rss_feed = RSS_FEED_HEADER.format(
+        date=datetime.datetime.now().isoformat() + 'Z',
+    )
 
     for date in config['dates']:
         today = datetime.datetime.strptime(date[0], '%Y%m%d')
