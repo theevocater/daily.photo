@@ -14,7 +14,6 @@ from typing import TypedDict
 RSS_FEED_HEADER = """\
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
   <updated>{date}</updated>
@@ -30,12 +29,14 @@ RSS_FEED_ENTRY = """
     <title>{title}</title>
     <link href="{link}"/>
     <id>{link}</id>
+    <summary type="html">
+        &lt;img src="{img_link}" title="{alt}" alt="{alt}" /&gt;
+    </summary>
     <updated>{date}</updated>
-    <summary>{subtitle}</summary>
   </entry>
 """
 
-RSS_FEED_TRAILER = '\n</feed >\n'
+RSS_FEED_TRAILER = '\n</feed>\n'
 
 
 def format_filename(output_dir: str, day: datetime.datetime) -> str:
@@ -129,7 +130,8 @@ def generate_day(
         title=metadata['subtitle'],
         link=f'https://daily.photo/{today.strftime("%Y%m%d")}.html',
         date=today.isoformat() + 'Z',  # TODO fix the TZs
-        subtitle=metadata['alt'],
+        alt=metadata['alt'],
+        img_link=f'https://daily.photo/images/{os.path.basename(image)}',
     )
 
 
