@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-05-19T23:24:38.106162Z</updated>
+  <updated>2022-05-20T00:24:30.634822Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -14,152 +13,190 @@
     <title>Prayer Box</title>
     <link href="https://daily.photo/20220501.html"/>
     <id>https://daily.photo/20220501.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/DSCF0715.JPG" title="A picture of a metal box that says prayer box hanging from a street sign." alt="A picture of a metal box that says prayer box hanging from a street sign." /&gt;
+    </summary>
     <updated>2022-05-01T00:00:00Z</updated>
-    <summary>A picture of a metal box that says prayer box hanging from a street sign.</summary>
   </entry>
 
   <entry>
     <title>Coffee Walk</title>
     <link href="https://daily.photo/20220502.html"/>
     <id>https://daily.photo/20220502.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/DSCF0712.JPG" title="A green cup of coffee labeled BLANK STREET held close in front of the camera. The blurred background is a blue car and red brick industrial building" alt="A green cup of coffee labeled BLANK STREET held close in front of the camera. The blurred background is a blue car and red brick industrial building" /&gt;
+    </summary>
     <updated>2022-05-02T00:00:00Z</updated>
-    <summary>A green cup of coffee labeled BLANK STREET held close in front of the camera. The blurred background is a blue car and red brick industrial building</summary>
   </entry>
 
   <entry>
     <title>Selfie</title>
     <link href="https://daily.photo/20220503.html"/>
     <id>https://daily.photo/20220503.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/DSCF0749.JPG" title="A selfie in the reflection of some plexiglass protecting a covered patio for a store." alt="A selfie in the reflection of some plexiglass protecting a covered patio for a store." /&gt;
+    </summary>
     <updated>2022-05-03T00:00:00Z</updated>
-    <summary>A selfie in the reflection of some plexiglass protecting a covered patio for a store.</summary>
   </entry>
 
   <entry>
     <title>Quarantine</title>
     <link href="https://daily.photo/20220504.html"/>
     <id>https://daily.photo/20220504.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000009410036.jpg" title="Photo of a window trimmed with curtains looking out from a dark room onto some white washed 4 or 5 story apartment buildings." alt="Photo of a window trimmed with curtains looking out from a dark room onto some white washed 4 or 5 story apartment buildings." /&gt;
+    </summary>
     <updated>2022-05-04T00:00:00Z</updated>
-    <summary>Photo of a window trimmed with curtains looking out from a dark room onto some white washed 4 or 5 story apartment buildings.</summary>
   </entry>
 
   <entry>
     <title>Free abortion on demand without apology!</title>
     <link href="https://daily.photo/20220505.html"/>
     <id>https://daily.photo/20220505.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/DSCF0852.jpg" title="3 posterboard signs a a protest. The first says 'FOR WORKERS ACTION - TO DEFEND ABORTION CLINICS', the second 'WOMENS LIBERATION THROUGH SOCIALIST REVOLUTION' and the third 'LABOR: DEFEND TRANS, GAY AND LESBIAN RIGHTS!'" alt="3 posterboard signs a a protest. The first says 'FOR WORKERS ACTION - TO DEFEND ABORTION CLINICS', the second 'WOMENS LIBERATION THROUGH SOCIALIST REVOLUTION' and the third 'LABOR: DEFEND TRANS, GAY AND LESBIAN RIGHTS!'" /&gt;
+    </summary>
     <updated>2022-05-05T00:00:00Z</updated>
-    <summary>3 posterboard signs a a protest. The first says 'FOR WORKERS ACTION - TO DEFEND ABORTION CLINICS', the second 'WOMENS LIBERATION THROUGH SOCIALIST REVOLUTION' and the third 'LABOR: DEFEND TRANS, GAY AND LESBIAN RIGHTS!'</summary>
   </entry>
 
   <entry>
     <title>Cherry Blossoms</title>
     <link href="https://daily.photo/20220506.html"/>
     <id>https://daily.photo/20220506.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000788230026.jpg" title="Cherry blossoms in full bloom planted in a straight line form a corridor down a grass path. A few dozen people are walking or sitting under the trees enjoying a sunny day." alt="Cherry blossoms in full bloom planted in a straight line form a corridor down a grass path. A few dozen people are walking or sitting under the trees enjoying a sunny day." /&gt;
+    </summary>
     <updated>2022-05-06T00:00:00Z</updated>
-    <summary>Cherry blossoms in full bloom planted in a straight line form a corridor down a grass path. A few dozen people are walking or sitting under the trees enjoying a sunny day.</summary>
   </entry>
 
   <entry>
     <title>Welcome to Utah</title>
     <link href="https://daily.photo/20220507.html"/>
     <id>https://daily.photo/20220507.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000817890011.jpg" title="The 'Welcome to Utah' sign on the highway entering Utah from Colorado against a blue sky." alt="The 'Welcome to Utah' sign on the highway entering Utah from Colorado against a blue sky." /&gt;
+    </summary>
     <updated>2022-05-07T00:00:00Z</updated>
-    <summary>The 'Welcome to Utah' sign on the highway entering Utah from Colorado against a blue sky.</summary>
   </entry>
 
   <entry>
     <title>BLACK TRANS LIFE IS SACRED</title>
     <link href="https://daily.photo/20220508.html"/>
     <id>https://daily.photo/20220508.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000088110027.jpg" title="A red sign hung on a fence labeled BLACK TRANS LIFE IS SACRED" alt="A red sign hung on a fence labeled BLACK TRANS LIFE IS SACRED" /&gt;
+    </summary>
     <updated>2022-05-08T00:00:00Z</updated>
-    <summary>A red sign hung on a fence labeled BLACK TRANS LIFE IS SACRED</summary>
   </entry>
 
   <entry>
     <title>Midday nap</title>
     <link href="https://daily.photo/20220509.html"/>
     <id>https://daily.photo/20220509.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000992530032.jpg" title="Fern sleeping on a blanket upside down." alt="Fern sleeping on a blanket upside down." /&gt;
+    </summary>
     <updated>2022-05-09T00:00:00Z</updated>
-    <summary>Fern sleeping on a blanket upside down.</summary>
   </entry>
 
   <entry>
     <title>Spring Selfie</title>
     <link href="https://daily.photo/20220510.html"/>
     <id>https://daily.photo/20220510.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/DSCF1083.jpg" title="Selfie of a man with a large beard and square glasses. He is standing in front a large pink flowering bush. He is holding an umbrella with bright design." alt="Selfie of a man with a large beard and square glasses. He is standing in front a large pink flowering bush. He is holding an umbrella with bright design." /&gt;
+    </summary>
     <updated>2022-05-10T00:00:00Z</updated>
-    <summary>Selfie of a man with a large beard and square glasses. He is standing in front a large pink flowering bush. He is holding an umbrella with bright design.</summary>
   </entry>
 
   <entry>
     <title>S Train</title>
     <link href="https://daily.photo/20220511.html"/>
     <id>https://daily.photo/20220511.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000838900028.jpg" title="The rear of the NYC S train sitting at an outdoor platform surrounded by greens sitting partially in shadow." alt="The rear of the NYC S train sitting at an outdoor platform surrounded by greens sitting partially in shadow." /&gt;
+    </summary>
     <updated>2022-05-11T00:00:00Z</updated>
-    <summary>The rear of the NYC S train sitting at an outdoor platform surrounded by greens sitting partially in shadow.</summary>
   </entry>
 
   <entry>
     <title>Seattle - Bainbridge Ferry</title>
     <link href="https://daily.photo/20220512.html"/>
     <id>https://daily.photo/20220512.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000838910012.jpg" title="An attractive young woman with black hair wearing a black shirt holding on to a green rail facing away. She is looking at downtown Seattle with the ferris wheel in the foreground." alt="An attractive young woman with black hair wearing a black shirt holding on to a green rail facing away. She is looking at downtown Seattle with the ferris wheel in the foreground." /&gt;
+    </summary>
     <updated>2022-05-12T00:00:00Z</updated>
-    <summary>An attractive young woman with black hair wearing a black shirt holding on to a green rail facing away. She is looking at downtown Seattle with the ferris wheel in the foreground.</summary>
   </entry>
 
   <entry>
     <title>Cleveland - Tower City</title>
     <link href="https://daily.photo/20220513.html"/>
     <id>https://daily.photo/20220513.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000818420014.jpg" title="A shot of the Tower City sign in Cleveland Ohio with the Hope Memorial bridge in the background." alt="A shot of the Tower City sign in Cleveland Ohio with the Hope Memorial bridge in the background." /&gt;
+    </summary>
     <updated>2022-05-13T00:00:00Z</updated>
-    <summary>A shot of the Tower City sign in Cleveland Ohio with the Hope Memorial bridge in the background.</summary>
   </entry>
 
   <entry>
     <title>Poolside</title>
     <link href="https://daily.photo/20220514.html"/>
     <id>https://daily.photo/20220514.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000799190016.jpg" title="3 palm trees planted on a small concrete island in the center of a pool against a blue blue sky." alt="3 palm trees planted on a small concrete island in the center of a pool against a blue blue sky." /&gt;
+    </summary>
     <updated>2022-05-14T00:00:00Z</updated>
-    <summary>3 palm trees planted on a small concrete island in the center of a pool against a blue blue sky.</summary>
   </entry>
 
   <entry>
     <title>Brooklyn</title>
     <link href="https://daily.photo/20220515.html"/>
     <id>https://daily.photo/20220515.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000992580023.jpg" title="a large oil painting of the arc de triumph leaning against the cast iron railing of a stoop of a brownstone in brooklyn" alt="a large oil painting of the arc de triumph leaning against the cast iron railing of a stoop of a brownstone in brooklyn" /&gt;
+    </summary>
     <updated>2022-05-15T00:00:00Z</updated>
-    <summary>a large oil painting of the arc de triumph leaning against the cast iron railing of a stoop of a brownstone in brooklyn</summary>
   </entry>
 
   <entry>
     <title>Spring Sundown</title>
     <link href="https://daily.photo/20220516.html"/>
     <id>https://daily.photo/20220516.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000992530019.jpg" title="The Brooklyn Bridge and the Verizon ATT building as seen from Brooklyn Bridge Park. The film has changed the trees to purple and added teal tones to the water in the fading light." alt="The Brooklyn Bridge and the Verizon ATT building as seen from Brooklyn Bridge Park. The film has changed the trees to purple and added teal tones to the water in the fading light." /&gt;
+    </summary>
     <updated>2022-05-16T00:00:00Z</updated>
-    <summary>The Brooklyn Bridge and the Verizon ATT building as seen from Brooklyn Bridge Park. The film has changed the trees to purple and added teal tones to the water in the fading light.</summary>
   </entry>
 
   <entry>
     <title>Selfie</title>
     <link href="https://daily.photo/20220517.html"/>
     <id>https://daily.photo/20220517.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000818390022.jpg" title="A picture of Jake in the reflection of a plate glass window." alt="A picture of Jake in the reflection of a plate glass window." /&gt;
+    </summary>
     <updated>2022-05-17T00:00:00Z</updated>
-    <summary>A picture of Jake in the reflection of a plate glass window.</summary>
   </entry>
 
   <entry>
     <title>Everyone loves the BQE</title>
     <link href="https://daily.photo/20220518.html"/>
     <id>https://daily.photo/20220518.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000992520039.jpg" title="A double exposure of downtown Manhattan from just above the BQE." alt="A double exposure of downtown Manhattan from just above the BQE." /&gt;
+    </summary>
     <updated>2022-05-18T00:00:00Z</updated>
-    <summary>A double exposure of downtown Manhattan from just above the BQE.</summary>
   </entry>
 
   <entry>
     <title>Wake</title>
     <link href="https://daily.photo/20220519.html"/>
     <id>https://daily.photo/20220519.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000838910022.jpg" title="The wake of the Seattle-Bainbridge ferry on a sunny day with Seattle falling into the distance." alt="The wake of the Seattle-Bainbridge ferry on a sunny day with Seattle falling into the distance." /&gt;
+    </summary>
     <updated>2022-05-19T00:00:00Z</updated>
-    <summary>The wake of the Seattle-Bainbridge ferry on a sunny day with Seattle falling into the distance.</summary>
   </entry>
 
-</feed >
+</feed>
