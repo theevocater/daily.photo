@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-05-20T00:24:30.634822Z</updated>
+  <updated>2022-05-20T00:33:00.008861Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -197,6 +197,16 @@
         &lt;img src="https://daily.photo/images/000838910022.jpg" title="The wake of the Seattle-Bainbridge ferry on a sunny day with Seattle falling into the distance." alt="The wake of the Seattle-Bainbridge ferry on a sunny day with Seattle falling into the distance." /&gt;
     </summary>
     <updated>2022-05-19T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>TOO HOT!</title>
+    <link href="https://daily.photo/20220520.html"/>
+    <id>https://daily.photo/20220520.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000758760003.jpg" title="A mug that says 'Jerry Springer TOO HOT!' sitting on a street corner." alt="A mug that says 'Jerry Springer TOO HOT!' sitting on a street corner." /&gt;
+    </summary>
+    <updated>2022-05-20T00:00:00Z</updated>
   </entry>
 
 </feed>
