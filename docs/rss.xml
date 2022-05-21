@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-05-20T00:33:00.008861Z</updated>
+  <updated>2022-05-21T10:45:23.328539Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -207,6 +207,16 @@
         &lt;img src="https://daily.photo/images/000758760003.jpg" title="A mug that says 'Jerry Springer TOO HOT!' sitting on a street corner." alt="A mug that says 'Jerry Springer TOO HOT!' sitting on a street corner." /&gt;
     </summary>
     <updated>2022-05-20T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Not so heavy industry</title>
+    <link href="https://daily.photo/20220521.html"/>
+    <id>https://daily.photo/20220521.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000838890036.jpg" title="Picture of a brick building with a smoke stack labeled with an unreadable company name and ELECTRIC SUPPLIES." alt="Picture of a brick building with a smoke stack labeled with an unreadable company name and ELECTRIC SUPPLIES." /&gt;
+    </summary>
+    <updated>2022-05-21T00:00:00Z</updated>
   </entry>
 
 </feed>
