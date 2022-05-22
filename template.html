@@ -21,6 +21,9 @@
         Daily Photo
         $tomorrow
       </h1>
+      <h2>
+        $date
+      </h2>
     </header>
     <main>
       <div id="pic">
@@ -28,12 +31,11 @@
         <h2>
           $subtitle
         </h2>
-        <p>
-          $date
-        </p>
-        <p>
-          $camera - $film
-        </p>
+        <ul id="metadata">
+          <li>Taken: $shot_date</li>
+          <li>Camera: $camera</li>
+          <li>Film: $film</li>
+        </ul>
       </div>
     </main>
   </body>

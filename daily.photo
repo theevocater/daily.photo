@@ -50,6 +50,7 @@ class TemplateSubstitutions(TypedDict):
     alt: str
     subtitle: str
     date: str
+    shot_date: str
     camera: str
     film: str
 
@@ -119,7 +120,8 @@ def generate_day(
             'image': f'images/{os.path.basename(image)}',
             'alt': metadata['alt'],
             'subtitle': metadata['subtitle'],
-            'date': photo_date(metadata.get('date')),
+            'date': today.strftime('%B %d, %Y'),
+            'shot_date': photo_date(metadata.get('date')),
             'camera': metadata.get('camera', ''),
             'film': metadata.get('film', ''),
         },
