@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-05-22T12:44:47.083878Z</updated>
+  <updated>2022-05-23T11:42:54.676743Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -227,6 +227,16 @@
         &lt;img src="https://daily.photo/images/000935280023.jpg" title="A turqoise sign that says 'Magnolia Cafe South' above a smaller 'Sorry We're Open'. In the back a further sign says 'The Salty'. A bunch of scooters block the sidewalk in the midground surrounded by cars." alt="A turqoise sign that says 'Magnolia Cafe South' above a smaller 'Sorry We're Open'. In the back a further sign says 'The Salty'. A bunch of scooters block the sidewalk in the midground surrounded by cars." /&gt;
     </summary>
     <updated>2022-05-22T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Summer Bird</title>
+    <link href="https://daily.photo/20220523.html"/>
+    <id>https://daily.photo/20220523.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000817870031.jpg" title="Tight shot of an antenna mounted on a steel girder in front a blue sky. 3 Lights march in the back." alt="Tight shot of an antenna mounted on a steel girder in front a blue sky. 3 Lights march in the back." /&gt;
+    </summary>
+    <updated>2022-05-23T00:00:00Z</updated>
   </entry>
 
 </feed>
