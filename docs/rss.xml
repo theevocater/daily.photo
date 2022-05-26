@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-05-25T17:17:29.084869Z</updated>
+  <updated>2022-05-25T17:19:50.849264Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -257,6 +257,16 @@
         &lt;img src="https://daily.photo/images/000891380034.jpg" title="A late night photo of Jake blurred by a long shutter with flash." alt="A late night photo of Jake blurred by a long shutter with flash." /&gt;
     </summary>
     <updated>2022-05-25T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Blank Street</title>
+    <link href="https://daily.photo/20220526.html"/>
+    <id>https://daily.photo/20220526.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000918760004.jpg" title="Black and White photo. Cass sitting on a bench in front of a coffee shop eating some banana bread wearing a constellations sweater." alt="Black and White photo. Cass sitting on a bench in front of a coffee shop eating some banana bread wearing a constellations sweater." /&gt;
+    </summary>
+    <updated>2022-05-26T00:00:00Z</updated>
   </entry>
 
 </feed>
