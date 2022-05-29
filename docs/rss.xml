@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-05-29T01:04:35.643689Z</updated>
+  <updated>2022-05-29T12:27:04.241974Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -287,6 +287,16 @@
         &lt;img src="https://daily.photo/images/000790090036.jpg" title="A bunch of records hanging on a window security gate. There are some card tables with in front with a bunch of records, dvds, cds, and other media." alt="A bunch of records hanging on a window security gate. There are some card tables with in front with a bunch of records, dvds, cds, and other media." /&gt;
     </summary>
     <updated>2022-05-28T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title></title>
+    <link href="https://daily.photo/20220529.html"/>
+    <id>https://daily.photo/20220529.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000896820014.jpg" title="" alt="" /&gt;
+    </summary>
+    <updated>2022-05-29T00:00:00Z</updated>
   </entry>
 
 </feed>
