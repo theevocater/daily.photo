@@ -145,6 +145,9 @@ def get_metadata_filename(metadata_dir: str, image: str) -> str:
 
 
 def choose_new(date: str) -> str:
+    """
+    Returns an image in converted/
+    """
     # get a list of image files
     new_image = random.choice(
         [image for image in os.listdir('converted') if image[-4:] != 'json'],
@@ -162,6 +165,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         '--new',
         help='Choose and add new from converted/ for YYYYMMDD',
     )
+    parser.add_argument(
+        '--image',
+        help='Optional. If passed, use a specific image instead of random.',
+    )
     args = parser.parse_args(argv)
 
     # constant metadata
@@ -175,7 +182,13 @@ def main(argv: Optional[List[str]] = None) -> int:
         if os.path.exists(f'{output_dir}/{args.new}.html'):
             print(f'{args.new} already exists!')
             return 1
-        new_image = choose_new(args.new)
+
+        if args.image is None:
+            new_image = choose_new(args.new)
+        else:
+            new_image = os.path.basename(args.image)
+
+        # TODO this should only move if necessary to make this more re-runnable
         metadata_file = get_metadata_filename(metadata_dir, new_image)
         shutil.move(
             f'converted/{new_image}',
