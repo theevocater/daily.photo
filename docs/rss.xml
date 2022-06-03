@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-06-01T17:56:25.235270Z</updated>
+  <updated>2022-06-03T11:35:50.698584Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -327,6 +327,26 @@
         &lt;img src="https://daily.photo/images/000818420029.jpg" title="An updward shot of the arcade in Cleveland including an art deco light in black and white" alt="An updward shot of the arcade in Cleveland including an art deco light in black and white" /&gt;
     </summary>
     <updated>2022-06-01T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Box Boy</title>
+    <link href="https://daily.photo/20220602.html"/>
+    <id>https://daily.photo/20220602.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000758740005.jpg" title="A black cat named Barley sitting in a small cardboard box lid on a wooden floor. He is looking up at the camera" alt="A black cat named Barley sitting in a small cardboard box lid on a wooden floor. He is looking up at the camera" /&gt;
+    </summary>
+    <updated>2022-06-02T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Crows Are Hard To Photograph</title>
+    <link href="https://daily.photo/20220603.html"/>
+    <id>https://daily.photo/20220603.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000009440019.jpg" title="A small crow stands in trimmed grass between some shrubs" alt="A small crow stands in trimmed grass between some shrubs" /&gt;
+    </summary>
+    <updated>2022-06-03T00:00:00Z</updated>
   </entry>
 
 </feed>
