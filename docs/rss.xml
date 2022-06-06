@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-06-03T11:35:50.698584Z</updated>
+  <updated>2022-06-06T15:44:30.410514Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -347,6 +347,36 @@
         &lt;img src="https://daily.photo/images/000009440019.jpg" title="A small crow stands in trimmed grass between some shrubs" alt="A small crow stands in trimmed grass between some shrubs" /&gt;
     </summary>
     <updated>2022-06-03T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Functional Building</title>
+    <link href="https://daily.photo/20220604.html"/>
+    <id>https://daily.photo/20220604.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000009450026.jpg" title="The corner of a white building with a sign that says SCALA above the door." alt="The corner of a white building with a sign that says SCALA above the door." /&gt;
+    </summary>
+    <updated>2022-06-04T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Cat Ride</title>
+    <link href="https://daily.photo/20220605.html"/>
+    <id>https://daily.photo/20220605.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000009450004.jpg" title="A paste up of a person wearing a striped shirt and black pants riding a giant hairless cat like a horse." alt="A paste up of a person wearing a striped shirt and black pants riding a giant hairless cat like a horse." /&gt;
+    </summary>
+    <updated>2022-06-05T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Muse</title>
+    <link href="https://daily.photo/20220606.html"/>
+    <id>https://daily.photo/20220606.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000009450034.jpg" title="Statue of a muse in an old London cemetary." alt="Statue of a muse in an old London cemetary." /&gt;
+    </summary>
+    <updated>2022-06-06T00:00:00Z</updated>
   </entry>
 
 </feed>
