@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-06-09T11:09:33.733625Z</updated>
+  <updated>2022-06-10T15:59:56.979954Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -407,6 +407,16 @@
         &lt;img src="https://daily.photo/images/000009460002.jpg" title="A close up of a swan standing in shallow very blue water." alt="A close up of a swan standing in shallow very blue water." /&gt;
     </summary>
     <updated>2022-06-09T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Happy Birthday</title>
+    <link href="https://daily.photo/20220610.html"/>
+    <id>https://daily.photo/20220610.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000009430020.jpg" title="Cass smiling" alt="Cass smiling" /&gt;
+    </summary>
+    <updated>2022-06-10T00:00:00Z</updated>
   </entry>
 
 </feed>
