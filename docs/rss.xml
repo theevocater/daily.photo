@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-06-13T10:46:17.217990Z</updated>
+  <updated>2022-06-15T10:21:26.665744Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -447,6 +447,26 @@
         &lt;img src="https://daily.photo/images/000009460030.jpg" title="" alt="" /&gt;
     </summary>
     <updated>2022-06-13T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title></title>
+    <link href="https://daily.photo/20220614.html"/>
+    <id>https://daily.photo/20220614.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000009450003.jpg" title="" alt="" /&gt;
+    </summary>
+    <updated>2022-06-14T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Rainy Spring</title>
+    <link href="https://daily.photo/20220615.html"/>
+    <id>https://daily.photo/20220615.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/DSCF0921.jpg" title="Two white flowers wth yellow stamen growing atop thin shoots on a plant with dark green waxy leaves." alt="Two white flowers wth yellow stamen growing atop thin shoots on a plant with dark green waxy leaves." /&gt;
+    </summary>
+    <updated>2022-06-15T00:00:00Z</updated>
   </entry>
 
 </feed>
