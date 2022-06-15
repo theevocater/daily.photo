@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-06-15T10:21:26.665744Z</updated>
+  <updated>2022-06-15T19:49:51.114190Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -290,11 +290,11 @@
   </entry>
 
   <entry>
-    <title></title>
+    <title>The Saratoga Fish</title>
     <link href="https://daily.photo/20220529.html"/>
     <id>https://daily.photo/20220529.html</id>
     <summary type="html">
-        &lt;img src="https://daily.photo/images/000896820014.jpg" title="" alt="" /&gt;
+        &lt;img src="https://daily.photo/images/000896820014.jpg" title="A fish sculpture made of small round stones pressed into concrete sitting in a clearing of mulch and fallen leaves." alt="A fish sculpture made of small round stones pressed into concrete sitting in a clearing of mulch and fallen leaves." /&gt;
     </summary>
     <updated>2022-05-29T00:00:00Z</updated>
   </entry>
@@ -420,41 +420,41 @@
   </entry>
 
   <entry>
-    <title></title>
+    <title>Cumming Street</title>
     <link href="https://daily.photo/20220611.html"/>
     <id>https://daily.photo/20220611.html</id>
     <summary type="html">
-        &lt;img src="https://daily.photo/images/000009450027.jpg" title="" alt="" /&gt;
+        &lt;img src="https://daily.photo/images/000009450027.jpg" title="London Borough of Islington sign for Cumming Street in front of a wrought iron fence." alt="London Borough of Islington sign for Cumming Street in front of a wrought iron fence." /&gt;
     </summary>
     <updated>2022-06-11T00:00:00Z</updated>
   </entry>
 
   <entry>
-    <title></title>
+    <title>Chicks</title>
     <link href="https://daily.photo/20220612.html"/>
     <id>https://daily.photo/20220612.html</id>
     <summary type="html">
-        &lt;img src="https://daily.photo/images/000009460020.jpg" title="" alt="" /&gt;
+        &lt;img src="https://daily.photo/images/000009460020.jpg" title="An egyptian goose with chicks preening at the shore line of an artificial lake." alt="An egyptian goose with chicks preening at the shore line of an artificial lake." /&gt;
     </summary>
     <updated>2022-06-12T00:00:00Z</updated>
   </entry>
 
   <entry>
-    <title></title>
+    <title>A Fence of Sorts</title>
     <link href="https://daily.photo/20220613.html"/>
     <id>https://daily.photo/20220613.html</id>
     <summary type="html">
-        &lt;img src="https://daily.photo/images/000009460030.jpg" title="" alt="" /&gt;
+        &lt;img src="https://daily.photo/images/000009460030.jpg" title="A picture of the shoreline of a slow moving river taken from the other shore. A straight line of wooden bollards cross the river with broken pieces of a chain spanning some of them. The far bank is tree lined and green against a blue sky." alt="A picture of the shoreline of a slow moving river taken from the other shore. A straight line of wooden bollards cross the river with broken pieces of a chain spanning some of them. The far bank is tree lined and green against a blue sky." /&gt;
     </summary>
     <updated>2022-06-13T00:00:00Z</updated>
   </entry>
 
   <entry>
-    <title></title>
+    <title>Meow</title>
     <link href="https://daily.photo/20220614.html"/>
     <id>https://daily.photo/20220614.html</id>
     <summary type="html">
-        &lt;img src="https://daily.photo/images/000009450003.jpg" title="" alt="" /&gt;
+        &lt;img src="https://daily.photo/images/000009450003.jpg" title="Graffiti of a happy cat raising one paw with sharp ears outlined in red." alt="Graffiti of a happy cat raising one paw with sharp ears outlined in red." /&gt;
     </summary>
     <updated>2022-06-14T00:00:00Z</updated>
   </entry>
