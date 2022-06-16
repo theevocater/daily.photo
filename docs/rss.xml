@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-06-15T19:49:51.114190Z</updated>
+  <updated>2022-06-16T14:20:29.471649Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -467,6 +467,16 @@
         &lt;img src="https://daily.photo/images/DSCF0921.jpg" title="Two white flowers wth yellow stamen growing atop thin shoots on a plant with dark green waxy leaves." alt="Two white flowers wth yellow stamen growing atop thin shoots on a plant with dark green waxy leaves." /&gt;
     </summary>
     <updated>2022-06-15T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Camdem Lock</title>
+    <link href="https://daily.photo/20220616.html"/>
+    <id>https://daily.photo/20220616.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000009430024.jpg" title="Camdem Town railway bridge. The bridge has the phrase 'Camdem Lock' painted on it. Graffiti artists have added two painters 'working'." alt="Camdem Town railway bridge. The bridge has the phrase 'Camdem Lock' painted on it. Graffiti artists have added two painters 'working'." /&gt;
+    </summary>
+    <updated>2022-06-16T00:00:00Z</updated>
   </entry>
 
 </feed>
