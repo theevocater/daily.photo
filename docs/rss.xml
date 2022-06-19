@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-06-17T13:17:50.171642Z</updated>
+  <updated>2022-06-18T20:24:45.606117Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -487,6 +487,16 @@
         &lt;img src="https://daily.photo/images/DSCF0912.jpg" title="Bonsai Wisteria in full bloom in a blue pot at the Brooklyn Botanic Garden" alt="Bonsai Wisteria in full bloom in a blue pot at the Brooklyn Botanic Garden" /&gt;
     </summary>
     <updated>2022-06-17T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Big Yawn!</title>
+    <link href="https://daily.photo/20220618.html"/>
+    <id>https://daily.photo/20220618.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000790070006.jpg" title="Fern (a brown tabby) yawning while laying on a brown infinity lounger." alt="Fern (a brown tabby) yawning while laying on a brown infinity lounger." /&gt;
+    </summary>
+    <updated>2022-06-18T00:00:00Z</updated>
   </entry>
 
 </feed>
