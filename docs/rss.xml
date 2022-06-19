@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-06-18T20:24:45.606117Z</updated>
+  <updated>2022-06-19T11:15:57.214243Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -497,6 +497,16 @@
         &lt;img src="https://daily.photo/images/000790070006.jpg" title="Fern (a brown tabby) yawning while laying on a brown infinity lounger." alt="Fern (a brown tabby) yawning while laying on a brown infinity lounger." /&gt;
     </summary>
     <updated>2022-06-18T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Sleeping in the way</title>
+    <link href="https://daily.photo/20220619.html"/>
+    <id>https://daily.photo/20220619.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000790080018.jpg" title="A closeup of Fern sleeping on the top stair on his side with his head on his front paws." alt="A closeup of Fern sleeping on the top stair on his side with his head on his front paws." /&gt;
+    </summary>
+    <updated>2022-06-19T00:00:00Z</updated>
   </entry>
 
 </feed>
