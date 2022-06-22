@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-06-20T17:14:44.649139Z</updated>
+  <updated>2022-06-22T00:03:23.184447Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -517,6 +517,16 @@
         &lt;img src="https://daily.photo/images/000790080033.jpg" title="A strange looking tank vehicle. In actuality, its a truck with a steel frame welded to the outside thats been covered in sheet metal." alt="A strange looking tank vehicle. In actuality, its a truck with a steel frame welded to the outside thats been covered in sheet metal." /&gt;
     </summary>
     <updated>2022-06-20T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Red</title>
+    <link href="https://daily.photo/20220621.html"/>
+    <id>https://daily.photo/20220621.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000790050013.jpg" title="A red ferrari parked in an empty parking lot." alt="A red ferrari parked in an empty parking lot." /&gt;
+    </summary>
+    <updated>2022-06-21T00:00:00Z</updated>
   </entry>
 
 </feed>
