@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-06-22T00:03:40.373637Z</updated>
+  <updated>2022-06-23T10:27:20.968793Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -537,6 +537,16 @@
         &lt;img src="https://daily.photo/images/000790070009.jpg" title="Fern looking out a window with his front paws on the ledge, and his rear paws on a cardboard lounger. This gives the impression he is standing upright and watching the neighbors." alt="Fern looking out a window with his front paws on the ledge, and his rear paws on a cardboard lounger. This gives the impression he is standing upright and watching the neighbors." /&gt;
     </summary>
     <updated>2022-06-22T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Selfie</title>
+    <link href="https://daily.photo/20220623.html"/>
+    <id>https://daily.photo/20220623.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000790070025.jpg" title="Selfie of Jake wearing a cloth mask. The fabric is a repeating pattern of the fat cat from final 14" alt="Selfie of Jake wearing a cloth mask. The fabric is a repeating pattern of the fat cat from final 14" /&gt;
+    </summary>
+    <updated>2022-06-23T00:00:00Z</updated>
   </entry>
 
 </feed>
