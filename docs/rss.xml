@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-06-24T14:58:51.981311Z</updated>
+  <updated>2022-06-25T16:24:22.119271Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -557,6 +557,16 @@
         &lt;img src="https://daily.photo/images/000758760037.jpg" title="Fern sitting on a grey blanket with his paw curled around a box. Fern has a serious expression." alt="Fern sitting on a grey blanket with his paw curled around a box. Fern has a serious expression." /&gt;
     </summary>
     <updated>2022-06-24T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Bigger Stretch Bud</title>
+    <link href="https://daily.photo/20220625.html"/>
+    <id>https://daily.photo/20220625.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/DSCF0816.jpg" title="Barley stretching his back from a blue couch to a maple coffee table." alt="Barley stretching his back from a blue couch to a maple coffee table." /&gt;
+    </summary>
+    <updated>2022-06-25T00:00:00Z</updated>
   </entry>
 
 </feed>
