@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-06-25T16:24:22.119271Z</updated>
+  <updated>2022-06-27T10:33:58.919340Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -567,6 +567,26 @@
         &lt;img src="https://daily.photo/images/DSCF0816.jpg" title="Barley stretching his back from a blue couch to a maple coffee table." alt="Barley stretching his back from a blue couch to a maple coffee table." /&gt;
     </summary>
     <updated>2022-06-25T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Blep</title>
+    <link href="https://daily.photo/20220626.html"/>
+    <id>https://daily.photo/20220626.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000758750025.jpg" title="Fern laying on his side with his tongue out asleep while being pet by Cass. He has a blep." alt="Fern laying on his side with his tongue out asleep while being pet by Cass. He has a blep." /&gt;
+    </summary>
+    <updated>2022-06-26T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Big Stretch Bud</title>
+    <link href="https://daily.photo/20220627.html"/>
+    <id>https://daily.photo/20220627.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/DSCF0171.jpg" title="Barley stretching his back while standing on a cardboard scratcher." alt="Barley stretching his back while standing on a cardboard scratcher." /&gt;
+    </summary>
+    <updated>2022-06-27T00:00:00Z</updated>
   </entry>
 
 </feed>
