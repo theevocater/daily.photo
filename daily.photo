@@ -6,6 +6,7 @@ import os
 import random
 import shutil
 import string
+import sys
 from typing import List
 from typing import Optional
 from typing import TypedDict
@@ -112,6 +113,12 @@ def generate_day(
     else:
         output_name = format_filename(output_dir, today)
 
+    try:
+        shot_date = photo_date(metadata.get('date'))
+    except ValueError:
+        print(f'Unable to parse {metadata_file} date: {metadata.get("date")}')
+        sys.exit(-1)
+
     generate_html(
         template,
         {
@@ -121,7 +128,7 @@ def generate_day(
             'alt': metadata['alt'],
             'subtitle': metadata['subtitle'],
             'date': today.strftime('%B %d, %Y'),
-            'shot_date': photo_date(metadata.get('date')),
+            'shot_date': shot_date,
             'camera': metadata.get('camera', ''),
             'film': metadata.get('film', ''),
         },
