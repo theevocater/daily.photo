@@ -117,7 +117,9 @@ def generate_day(
         shot_date = photo_date(metadata.get('date'))
     except ValueError:
         print(f'Unable to parse {metadata_file} date: {metadata.get("date")}')
-        sys.exit(-1)
+        # TODO: error handling shouldn't be immediate exit. need to better
+        # collect and bubble errors
+        sys.exit(1)
 
     generate_html(
         template,
