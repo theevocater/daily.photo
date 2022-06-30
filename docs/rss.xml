@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-06-29T10:43:15.426690Z</updated>
+  <updated>2022-06-30T11:26:09.429851Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -607,6 +607,16 @@
         &lt;img src="https://daily.photo/images/DSCF0167.jpg" title="Fern asleep on a small cardboard cat lounger." alt="Fern asleep on a small cardboard cat lounger." /&gt;
     </summary>
     <updated>2022-06-29T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Beach Vibes</title>
+    <link href="https://daily.photo/20220630.html"/>
+    <id>https://daily.photo/20220630.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000799480014.jpg" title="Black and white photo of a beach. There are lots of thatched umbrellas shading lounge chairs and in the distance a surfboard has been stuck in the ground." alt="Black and white photo of a beach. There are lots of thatched umbrellas shading lounge chairs and in the distance a surfboard has been stuck in the ground." /&gt;
+    </summary>
+    <updated>2022-06-30T00:00:00Z</updated>
   </entry>
 
 </feed>
