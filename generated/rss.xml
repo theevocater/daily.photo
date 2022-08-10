@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Daily Photo</title>
   <link rel="self" href="https://daily.photo"/>
-  <updated>2022-06-30T11:26:09.429851Z</updated>
+  <updated>2022-08-10T18:52:22.784178Z</updated>
   <author>
     <name>Jake Kaufman</name>
     <email>me@jake.computer</email>
@@ -617,6 +617,16 @@
         &lt;img src="https://daily.photo/images/000799480014.jpg" title="Black and white photo of a beach. There are lots of thatched umbrellas shading lounge chairs and in the distance a surfboard has been stuck in the ground." alt="Black and white photo of a beach. There are lots of thatched umbrellas shading lounge chairs and in the distance a surfboard has been stuck in the ground." /&gt;
     </summary>
     <updated>2022-06-30T00:00:00Z</updated>
+  </entry>
+
+  <entry>
+    <title>Cloudy Day</title>
+    <link href="https://daily.photo/20220701.html"/>
+    <id>https://daily.photo/20220701.html</id>
+    <summary type="html">
+        &lt;img src="https://daily.photo/images/000817880031.jpg" title="The horizon sits at the bottom of the image as a reminder the earth exists below a deep blue sky checkered with fluffy white clouds." alt="The horizon sits at the bottom of the image as a reminder the earth exists below a deep blue sky checkered with fluffy white clouds." /&gt;
+    </summary>
+    <updated>2022-07-01T00:00:00Z</updated>
   </entry>
 
 </feed>

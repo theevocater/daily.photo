@@ -210,6 +210,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         config['dates'].append([args.new, new_image])
         with open(config_file, 'w') as c:
             json.dump(config, c, sort_keys=True, indent=2)
+            c.write('\n')
 
     no_prev = True
     no_next = False
@@ -252,7 +253,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             no_prev = False
 
     rss_feed += RSS_FEED_TRAILER
-    with open('docs/rss.xml', 'w') as rss:
+    with open(f'{output_dir}/rss.xml', 'w') as rss:
         rss.write(rss_feed)
 
     return 0

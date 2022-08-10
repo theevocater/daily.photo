@@ -243,10 +243,14 @@
     [
       "20220630",
       "000799480014.jpg"
+    ],
+    [
+      "20220701",
+      "000817880031.jpg"
     ]
   ],
-  "images_dir": "docs/images",
+  "images_dir": "generated/images",
   "metadata_dir": "metadata",
-  "output_dir": "docs",
+  "output_dir": "generated",
   "template": "template.html"
 }
