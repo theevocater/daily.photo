@@ -220,9 +220,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     if args.new:
         # TODO(jakeman) detect duplicate images when adding a new one
-        if os.path.exists(f'{output_dir}/{args.new}.html'):
-            print(f'{args.new} already exists!')
-            return 1
+        # TODO(jakeman) detect duplicate dates when adding a new one
 
         if args.image is None:
             new_image = choose_new(args.new)
@@ -233,7 +231,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         metadata_file = get_metadata_filename(metadata_dir, new_image)
         shutil.move(
             f'converted/{new_image}',
-            f'{output_dir}/images/{new_image}',
+            f'images/{new_image}',
         )
         shutil.move(
             f'converted/{os.path.basename(metadata_file)}',
