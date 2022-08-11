@@ -7,6 +7,8 @@ import random
 import shutil
 import string
 import sys
+from typing import Any
+from typing import Dict
 from typing import List
 from typing import Optional
 from typing import TypedDict
@@ -88,6 +90,13 @@ def generate_day(
     no_prev: bool,
     output_dir: str,
 ) -> str:
+    if index:
+        output_name = os.path.join(output_dir, 'index.html')
+    else:
+        output_name = format_filename(output_dir, today)
+
+    print(f'Generating {output_name}')
+
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
 
@@ -107,11 +116,6 @@ def generate_day(
         tomorrow_text = '<a href="{}">-&gt;</a>'.format(
             format_filename('/', tomorrow),
         )
-
-    if index:
-        output_name = os.path.join(output_dir, 'index.html')
-    else:
-        output_name = format_filename(output_dir, today)
 
     try:
         shot_date = photo_date(metadata.get('date'))
@@ -176,21 +180,72 @@ def setup_output_dir(output_dir: str) -> bool:
     Creates the output dir and links base files like CSS
     """
     if not os.path.exists(output_dir):
+        print(f'Creating {output_dir}')
         os.mkdir(output_dir)
 
     images = f'{output_dir}/images'
     if not os.path.exists(images):
+        print(f'Creating {images}')
         os.mkdir(images)
 
     cname = f'{output_dir}/CNAME'
-    if not os.path.lexists(cname):
+    if not os.path.exists(cname):
+        print(f'Creating {cname}')
         os.symlink('../CNAME', cname)
 
     main_css = f'{output_dir}/main.css'
     if not os.path.exists(main_css):
+        print(f'Creating {main_css}')
         os.symlink('../main.css', main_css)
 
     return True
+
+
+def add_new_image(
+    new_date: str,
+    new_image: str,
+    metadata_dir: str,
+    config_file: str,
+    config: Dict[str, Any],
+):
+    # Detect if a date or image has been used before
+    for date, image in config['dates']:
+        if date == new_date:
+            print(f'Error: already have an image for {new_date}')
+            exit(1)
+        if new_image and image == new_image:
+            print(f'Error: {new_image} was already used on {date}')
+            exit(1)
+
+    if new_image is None:
+        new_image = choose_new(new_date)
+    else:
+        new_image = os.path.basename(new_image)
+
+    old_image_path = f'converted/{new_image}'
+    new_image_path = f'images/{new_image}'
+    if not os.path.exists(old_image_path):
+        print(f'Error: {old_image_path} does not exist')
+        exit(1)
+
+    new_metadata_file = get_metadata_filename(metadata_dir, new_image)
+    old_metadata_file = f'converted/{os.path.basename(new_metadata_file)}'
+    if not os.path.exists(old_metadata_file):
+        print(f'Error: {old_metadata_file} does not exist')
+        exit(1)
+
+    print(f'Moving {old_image_path} to {new_image_path}')
+    shutil.move(old_image_path, new_image_path)
+
+    print(f'Moving {old_metadata_file} to {new_metadata_file}')
+    shutil.move(old_metadata_file, new_metadata_file)
+
+    config['dates'].append([new_date, new_image])
+    print(f'Writing {config_file}')
+    with open(config_file, 'w') as c:
+        json.dump(config, c, sort_keys=True, indent=2)
+        c.write('\n')
+    print(f'Added {new_date}: {new_image}')
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -219,29 +274,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     setup_output_dir(output_dir)
 
     if args.new:
-        # TODO(jakeman) detect duplicate images when adding a new one
-        # TODO(jakeman) detect duplicate dates when adding a new one
-
-        if args.image is None:
-            new_image = choose_new(args.new)
-        else:
-            new_image = os.path.basename(args.image)
-
-        # TODO this should only move if necessary to make this more re-runnable
-        metadata_file = get_metadata_filename(metadata_dir, new_image)
-        shutil.move(
-            f'converted/{new_image}',
-            f'images/{new_image}',
+        add_new_image(
+            new_date=args.new,
+            new_image=args.image,
+            metadata_dir=metadata_dir,
+            config_file=config_file,
+            config=config,
         )
-        shutil.move(
-            f'converted/{os.path.basename(metadata_file)}',
-            metadata_file,
-        )
-        config['dates'].append([args.new, new_image])
-        with open(config_file, 'w') as c:
-            json.dump(config, c, sort_keys=True, indent=2)
-            c.write('\n')
 
+    print('Generating site')
     no_prev = True
     no_next = False
     rss_feed = RSS_FEED_HEADER.format(
@@ -282,7 +323,9 @@ def main(argv: Optional[List[str]] = None) -> int:
             no_prev = False
 
     rss_feed += RSS_FEED_TRAILER
-    with open(f'{output_dir}/rss.xml', 'w') as rss:
+    rss_file = f'{output_dir}/rss.xml'
+    print(f'Writing {rss_file}')
+    with open(rss_file, 'w') as rss:
         rss.write(rss_feed)
 
     return 0
