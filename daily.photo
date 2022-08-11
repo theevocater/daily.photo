@@ -121,12 +121,19 @@ def generate_day(
         # collect and bubble errors
         sys.exit(1)
 
+    output_image = f'images/{image}'
+    if not os.path.exists(f'{output_dir}/{output_image}'):
+        if os.path.lexists(f'{output_dir}/{output_image}'):
+            # fix broken links
+            os.remove(f'{output_dir}/{output_image}')
+        os.symlink(f'../../{output_image}', f'{output_dir}/{output_image}')
+
     generate_html(
         template,
         {
             'yesterday': yesterday_text,
             'tomorrow': tomorrow_text,
-            'image': f'images/{os.path.basename(image)}',
+            'image': output_image,
             'alt': metadata['alt'],
             'subtitle': metadata['subtitle'],
             'date': today.strftime('%B %d, %Y'),
@@ -164,6 +171,28 @@ def choose_new(date: str) -> str:
     return new_image
 
 
+def setup_output_dir(output_dir: str) -> bool:
+    """
+    Creates the output dir and links base files like CSS
+    """
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+
+    images = f'{output_dir}/images'
+    if not os.path.exists(images):
+        os.mkdir(images)
+
+    cname = f'{output_dir}/CNAME'
+    if not os.path.lexists(cname):
+        os.symlink('../CNAME', cname)
+
+    main_css = f'{output_dir}/main.css'
+    if not os.path.exists(main_css):
+        os.symlink('../main.css', main_css)
+
+    return True
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description='generate todays pic site')
     parser.add_argument(
@@ -187,10 +216,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     template = config['template']
     metadata_dir = config['metadata_dir']
 
+    setup_output_dir(output_dir)
+
     if args.new:
-        if os.path.exists(f'{output_dir}/{args.new}.html'):
-            print(f'{args.new} already exists!')
-            return 1
+        # TODO(jakeman) detect duplicate images when adding a new one
+        # TODO(jakeman) detect duplicate dates when adding a new one
 
         if args.image is None:
             new_image = choose_new(args.new)
@@ -201,7 +231,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         metadata_file = get_metadata_filename(metadata_dir, new_image)
         shutil.move(
             f'converted/{new_image}',
-            f'{output_dir}/images/{new_image}',
+            f'images/{new_image}',
         )
         shutil.move(
             f'converted/{os.path.basename(metadata_file)}',
@@ -218,12 +248,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         date=datetime.datetime.now().isoformat() + 'Z',
     )
 
-    for date in config['dates']:
-        today = datetime.datetime.strptime(date[0], '%Y%m%d')
-        image = date[1]
+    for date, image in config['dates']:
+        today = datetime.datetime.strptime(date, '%Y%m%d')
         metadata_file = get_metadata_filename(metadata_dir, image)
 
-        if config['dates'][-1] == date:
+        if config['dates'][-1][0] == date:
             # Last day we need to generate the index and no anchor
             no_next = True
             generate_day(
