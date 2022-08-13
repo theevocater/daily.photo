@@ -13,6 +13,9 @@ from typing import List
 from typing import Optional
 from typing import TypedDict
 
+UNUSED_IMAGES = 'converted'
+IMAGES = 'images'
+
 
 RSS_FEED_HEADER = """\
 <?xml version="1.0" encoding="utf-8"?>
@@ -79,6 +82,13 @@ def photo_date(date: str) -> str:
     return datetime.datetime.strptime(date, '%Y%m%d').strftime('%B %d, %Y')
 
 
+def rss_date(date: datetime.datetime) -> str:
+    """
+    Return a ISO3601 UTC date without external library
+    """
+    return date.isoformat() + 'Z'
+
+
 def generate_day(
     *,
     today: datetime.datetime,
@@ -125,19 +135,21 @@ def generate_day(
         # collect and bubble errors
         sys.exit(1)
 
-    output_image = f'images/{image}'
-    if not os.path.exists(f'{output_dir}/{output_image}'):
-        if os.path.lexists(f'{output_dir}/{output_image}'):
+    # symlink this days image to the output directory
+    intput_image = os.path.join('..', '..', IMAGES, image)
+    output_image = os.path.join(output_dir, IMAGES, image)
+    if not os.path.exists(output_image):
+        if os.path.lexists(output_image):
             # fix broken links
-            os.remove(f'{output_dir}/{output_image}')
-        os.symlink(f'../../{output_image}', f'{output_dir}/{output_image}')
+            os.remove(output_image)
+        os.symlink(intput_image, output_image)
 
     generate_html(
         template,
         {
             'yesterday': yesterday_text,
             'tomorrow': tomorrow_text,
-            'image': output_image,
+            'image': os.path.join(IMAGES, image),
             'alt': metadata['alt'],
             'subtitle': metadata['subtitle'],
             'date': today.strftime('%B %d, %Y'),
@@ -148,12 +160,16 @@ def generate_day(
         output_name,
     )
 
+    if index:
+        # index isn't included in the RSS feed
+        return ''
+
     return RSS_FEED_ENTRY.format(
         title=metadata['subtitle'],
         link=f'https://daily.photo/{today.strftime("%Y%m%d")}.html',
-        date=today.isoformat() + 'Z',  # TODO fix the TZs
+        date=rss_date(today),
         alt=metadata['alt'],
-        img_link=f'https://daily.photo/images/{os.path.basename(image)}',
+        img_link=f'https://daily.photo/images/{image}',
     )
 
 
@@ -164,17 +180,6 @@ def get_metadata_filename(metadata_dir: str, image: str) -> str:
     )
 
 
-def choose_new(date: str) -> str:
-    """
-    Returns an image in converted/
-    """
-    # get a list of image files
-    new_image = random.choice(
-        [image for image in os.listdir('converted') if image[-4:] != 'json'],
-    )
-    return new_image
-
-
 def setup_output_dir(output_dir: str) -> bool:
     """
     Creates the output dir and links base files like CSS
@@ -183,7 +188,7 @@ def setup_output_dir(output_dir: str) -> bool:
         print(f'Creating {output_dir}')
         os.mkdir(output_dir)
 
-    images = f'{output_dir}/images'
+    images = os.path.join(output_dir, IMAGES)
     if not os.path.exists(images):
         print(f'Creating {images}')
         os.mkdir(images)
@@ -201,100 +206,30 @@ def setup_output_dir(output_dir: str) -> bool:
     return True
 
 
-def add_new_image(
-    new_date: str,
-    new_image: str,
-    metadata_dir: str,
-    config_file: str,
+def generate(
+    *,
     config: Dict[str, Any],
-):
-    # Detect if a date or image has been used before
-    for date, image in config['dates']:
-        if date == new_date:
-            print(f'Error: already have an image for {new_date}')
-            exit(1)
-        if new_image and image == new_image:
-            print(f'Error: {new_image} was already used on {date}')
-            exit(1)
-
-    if new_image is None:
-        new_image = choose_new(new_date)
-    else:
-        new_image = os.path.basename(new_image)
-
-    old_image_path = f'converted/{new_image}'
-    new_image_path = f'images/{new_image}'
-    if not os.path.exists(old_image_path):
-        print(f'Error: {old_image_path} does not exist')
-        exit(1)
-
-    new_metadata_file = get_metadata_filename(metadata_dir, new_image)
-    old_metadata_file = f'converted/{os.path.basename(new_metadata_file)}'
-    if not os.path.exists(old_metadata_file):
-        print(f'Error: {old_metadata_file} does not exist')
-        exit(1)
-
-    print(f'Moving {old_image_path} to {new_image_path}')
-    shutil.move(old_image_path, new_image_path)
-
-    print(f'Moving {old_metadata_file} to {new_metadata_file}')
-    shutil.move(old_metadata_file, new_metadata_file)
-
-    config['dates'].append([new_date, new_image])
-    print(f'Writing {config_file}')
-    with open(config_file, 'w') as c:
-        json.dump(config, c, sort_keys=True, indent=2)
-        c.write('\n')
-    print(f'Added {new_date}: {new_image}')
-
-
-def main(argv: Optional[List[str]] = None) -> int:
-    parser = argparse.ArgumentParser(description='generate todays pic site')
-    parser.add_argument(
-        '--config',
-        help='Path to config file. defaults to ./config.json',
-    )
-    parser.add_argument(
-        '--new',
-        help='Choose and add new from converted/ for YYYYMMDD',
-    )
-    parser.add_argument(
-        '--image',
-        help='Optional. If passed, use a specific image instead of random.',
-    )
-    args = parser.parse_args(argv)
-
-    # constant metadata
-    config_file = args.config or 'config.json'
-    config = json.load(open(config_file))
-    output_dir = config['output_dir']
-    template = config['template']
-    metadata_dir = config['metadata_dir']
-
-    setup_output_dir(output_dir)
-
-    if args.new:
-        add_new_image(
-            new_date=args.new,
-            new_image=args.image,
-            metadata_dir=metadata_dir,
-            config_file=config_file,
-            config=config,
-        )
-
+    metadata_dir: str,
+    output_dir: str,
+    template: str,
+) -> int:
     print('Generating site')
+    if not setup_output_dir(output_dir):
+        return 1
+
+    rss_feed = RSS_FEED_HEADER.format(
+        date=rss_date(datetime.datetime.now()),
+    )
+
     no_prev = True
     no_next = False
-    rss_feed = RSS_FEED_HEADER.format(
-        date=datetime.datetime.now().isoformat() + 'Z',
-    )
-
     for date, image in config['dates']:
         today = datetime.datetime.strptime(date, '%Y%m%d')
         metadata_file = get_metadata_filename(metadata_dir, image)
 
         if config['dates'][-1][0] == date:
             # Last day we need to generate the index and no anchor
+            # The index isn't included in the RSS feed
             no_next = True
             generate_day(
                 today=today,
@@ -323,12 +258,117 @@ def main(argv: Optional[List[str]] = None) -> int:
             no_prev = False
 
     rss_feed += RSS_FEED_TRAILER
-    rss_file = f'{output_dir}/rss.xml'
+    rss_file = os.path.join(output_dir, 'rss.xml')
     print(f'Writing {rss_file}')
     with open(rss_file, 'w') as rss:
         rss.write(rss_feed)
 
     return 0
+
+
+def new(
+    *,
+    new_date: str,
+    new_image: Optional[str],
+    metadata_dir: str,
+    config_file: str,
+    config: Dict[str, Any],
+) -> int:
+    """
+    Choose and move a new image to IMAGES
+    """
+    # Detect if a date or image has been used before
+    for date, image in config['dates']:
+        if date == new_date:
+            print(f'Error: already have an image for {new_date}')
+            return 1
+        if new_image and image == new_image:
+            print(f'Error: {new_image} was already used on {date}')
+            return 1
+
+    if new_image is None:
+        new_image = random.choice(
+            [
+                image
+                for image in os.listdir(
+                    UNUSED_IMAGES,
+                )
+                if image[-4:] != 'json'
+            ],
+        )
+    else:
+        new_image = os.path.basename(new_image)
+
+    old_image_path = os.path.join(UNUSED_IMAGES, new_image)
+    new_image_path = os.path.join(IMAGES, new_image)
+    if not os.path.exists(old_image_path):
+        print(f'Error: {old_image_path} does not exist')
+        return 1
+
+    new_metadata_file = get_metadata_filename(metadata_dir, new_image)
+    old_metadata_file = os.path.join(
+        UNUSED_IMAGES,
+        os.path.basename(new_metadata_file),
+    )
+    if not os.path.exists(old_metadata_file):
+        print(f'Error: {old_metadata_file} does not exist')
+        return 1
+
+    print(f'Moving {old_image_path} to {new_image_path}')
+    shutil.move(old_image_path, new_image_path)
+
+    print(f'Moving {old_metadata_file} to {new_metadata_file}')
+    shutil.move(old_metadata_file, new_metadata_file)
+
+    config['dates'].append([new_date, new_image])
+    print(f'Writing {config_file}')
+    with open(config_file, 'w') as c:
+        json.dump(config, c, sort_keys=True, indent=2)
+        # json module doesn't write a trailing newline by default
+        c.write(os.linesep)
+
+    print(f'Added {new_date}: {new_image}')
+    return 0
+
+
+def main(argv: Optional[List[str]] = None) -> int:
+    parser = argparse.ArgumentParser(description='generate todays pic site')
+    parser.add_argument(
+        '--config',
+        help='Path to config file. defaults to ./config.json',
+    )
+    parser.add_argument(
+        '--new',
+        help=f'Choose and add new from {UNUSED_IMAGES} for YYYYMMDD',
+    )
+    parser.add_argument(
+        '--image',
+        help='Optional. If passed, use a specific image instead of random.',
+    )
+    args = parser.parse_args(argv)
+
+    # constant metadata
+    config_file = args.config or 'config.json'
+    config = json.load(open(config_file))
+    output_dir = config['output_dir']
+    template = config['template']
+    metadata_dir = config['metadata_dir']
+
+    if args.new:
+        return new(
+            new_date=args.new,
+            new_image=args.image,
+            metadata_dir=metadata_dir,
+            config_file=config_file,
+            config=config,
+        )
+
+    return generate(
+        config=config,
+        metadata_dir=metadata_dir,
+        output_dir=output_dir,
+        template=template,
+    )
 
 
 if __name__ == '__main__':
