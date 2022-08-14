@@ -7,6 +7,7 @@ import random
 import shutil
 import string
 import sys
+from typing import Any
 from typing import List
 from typing import Optional
 from typing import TypedDict
@@ -328,12 +329,29 @@ def new(
     return 0
 
 
+def valid_str(value: Any) -> bool:
+    return isinstance(value, str) and len(value) > 0
+
+
+def valid_date(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    day = value
+    if len(day) != 8:
+        return False
+    try:
+        datetime.datetime.strptime(day, '%Y%m%d')
+    except ValueError:
+        return False
+    return True
+
+
 def validate(*, config_file: str) -> int:
     try:
-        config = json.load(open(config_file))
+        with open(config_file) as c:
+            config = json.load(c)
     except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
-        print(e)
-        print(f'Unable to load config_file: {config_file}')
+        print(f'Unable to load config_file: {config_file}.', e)
         return 1
 
     dates = config.get('dates', None)
@@ -342,29 +360,56 @@ def validate(*, config_file: str) -> int:
         print('No dates set in config')
         return 1
 
+    metadata_keys = {
+        'alt': valid_str,
+        'camera': valid_str,
+        'date': valid_date,
+        'film': valid_str,
+        'subtitle': valid_str,
+    }
+
     ret = 0
     for date in dates:
         if len(date) != 2:
-            print('{date} is misformatted')
+            print(f'Entry {date} has the wrong number of fields')
             ret += 1
 
         day = date[0]
+        if not valid_date(day):
+            print(f'Entry {date} unable to parse date {day}')
+            ret += 1
+
         image = date[1]
 
         if not os.path.exists(os.path.join(IMAGES, image)):
-            print(f'Error: {day}: {image} missing jpg')
+            print(f'Entry {date}: {image} missing jpg')
             ret += 1
 
-        if not os.path.exists(get_metadata_filename(METADATA_DIR, image)):
-            print(f'Error: {day}: {image} missing metadata')
-            ret += 1
-
-        if len(day) != 8:
-            print(f'{day} is not in YYYYMMDD')
+        metadata_file = get_metadata_filename(METADATA_DIR, image)
         try:
-            datetime.datetime.strptime(day, '%Y%m%d')
-        except ValueError as e:
-            print(f'Unable to parse {day} as datetime {e}')
+            with open(metadata_file) as md:
+                metadata = json.load(md)
+        except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
+            ret += 1
+            print(f'Entry {date} unable to load {metadata_file}: ', e)
+            continue
+
+        for key, validator in metadata_keys.items():
+            if key not in metadata:
+                print(f'{metadata_file} missing key "{key}"')
+                ret += 1
+                continue
+
+            if not validator(metadata[key]):
+                print(
+                    f'{metadata_file} unable to validate'
+                    f': {key} -> {metadata[key]}',
+                )
+                ret += 1
+            del metadata[key]
+
+        if len(metadata) > 0:
+            print(f'{metadata_file} has extra keys {metadata.keys()}')
             ret += 1
 
     return ret
@@ -373,32 +418,34 @@ def validate(*, config_file: str) -> int:
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description='generate todays pic site')
     parser.add_argument(
-        '--config_file',
+        '--config-file',
         help='Path to config file. defaults to ./config.json',
         default='config.json',
     )
     subparsers = parser.add_subparsers(dest='function')
     sp = subparsers.add_parser(
         'generate',
-        help='Default: Generate static site suitable for gh pages',
+        help='default: Generate static site suitable for gh pages',
     )
 
     sp = subparsers.add_parser(
         'new',
-        help=f'Choose and add new image from {UNUSED_IMAGES} for YYYYMMDD',
+        help=f'choose and add new image from {UNUSED_IMAGES} for YYYYMMDD',
     )
     sp.add_argument(
-        'date',
-        help='YYYYMMDD to add new image.',
+        'new_date',
+        metavar='date',
+        help='YYYYMMDD to add new image',
     )
     sp.add_argument(
         '--image',
-        help='Optional. If passed, use a specific image instead of random.',
+        dest='new_image',
+        help='optional. if passed, use a specific image instead of random',
     )
 
     sp = subparsers.add_parser(
         'validate',
-        help='Validate config.json',
+        help='validate config.json',
     )
     # TODO switch to using set_default(func)
     args = parser.parse_args(argv)

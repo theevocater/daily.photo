@@ -46,9 +46,8 @@ repos:
     rev: v1.1.2
     hooks:
     -   id: htmlhint
-    #-   id: htmllint
 -   repo: https://github.com/psf/black
     rev: 22.6.0
     hooks:
       - id: black
-        args: [--skip-string-normalization]
+        args: [--skip-string-normalization, --line-length, "79"]
