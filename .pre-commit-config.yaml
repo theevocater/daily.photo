@@ -51,3 +51,11 @@ repos:
     hooks:
       - id: black
         args: [--skip-string-normalization, --line-length, "79"]
+-   repo: local
+    hooks:
+      - id: validate
+        name: validate config
+        language: script
+        entry: daily.photo validate
+        files: .json|.jpg
+        pass_filenames: false
