@@ -447,7 +447,6 @@ def main(argv: Optional[List[str]] = None) -> int:
         'validate',
         help='validate config.json',
     )
-    # TODO switch to using set_default(func)
     args = parser.parse_args(argv)
 
     if args.function == 'new':
