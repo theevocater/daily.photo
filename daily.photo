@@ -8,14 +8,15 @@ import shutil
 import string
 import sys
 from typing import Any
-from typing import Dict
 from typing import List
 from typing import Optional
 from typing import TypedDict
 
 UNUSED_IMAGES = 'converted'
 IMAGES = 'images'
-
+METADATA_DIR = 'metadata'
+OUTPUT_DIR = 'generated'
+TEMPLATE = 'template.html'
 
 RSS_FEED_HEADER = """\
 <?xml version="1.0" encoding="utf-8"?>
@@ -208,13 +209,11 @@ def setup_output_dir(output_dir: str) -> bool:
 
 def generate(
     *,
-    config: Dict[str, Any],
-    metadata_dir: str,
-    output_dir: str,
-    template: str,
+    config_file: str,
 ) -> int:
+    config = json.load(open(config_file))
     print('Generating site')
-    if not setup_output_dir(output_dir):
+    if not setup_output_dir(OUTPUT_DIR):
         return 1
 
     rss_feed = RSS_FEED_HEADER.format(
@@ -225,7 +224,7 @@ def generate(
     no_next = False
     for date, image in config['dates']:
         today = datetime.datetime.strptime(date, '%Y%m%d')
-        metadata_file = get_metadata_filename(metadata_dir, image)
+        metadata_file = get_metadata_filename(METADATA_DIR, image)
 
         if config['dates'][-1][0] == date:
             # Last day we need to generate the index and no anchor
@@ -238,8 +237,8 @@ def generate(
                 metadata_file=metadata_file,
                 no_next=no_next,
                 no_prev=no_prev,
-                template=template,
-                output_dir=output_dir,
+                template=TEMPLATE,
+                output_dir=OUTPUT_DIR,
             )
 
         rss_feed += generate_day(
@@ -249,8 +248,8 @@ def generate(
             metadata_file=metadata_file,
             no_next=no_next,
             no_prev=no_prev,
-            template=template,
-            output_dir=output_dir,
+            template=TEMPLATE,
+            output_dir=OUTPUT_DIR,
         )
 
         if no_prev:
@@ -258,7 +257,7 @@ def generate(
             no_prev = False
 
     rss_feed += RSS_FEED_TRAILER
-    rss_file = os.path.join(output_dir, 'rss.xml')
+    rss_file = os.path.join(OUTPUT_DIR, 'rss.xml')
     print(f'Writing {rss_file}')
     with open(rss_file, 'w') as rss:
         rss.write(rss_feed)
@@ -270,13 +269,12 @@ def new(
     *,
     new_date: str,
     new_image: Optional[str],
-    metadata_dir: str,
     config_file: str,
-    config: Dict[str, Any],
 ) -> int:
     """
     Choose and move a new image to IMAGES
     """
+    config = json.load(open(config_file))
     # Detect if a date or image has been used before
     for date, image in config['dates']:
         if date == new_date:
@@ -305,7 +303,7 @@ def new(
         print(f'Error: {old_image_path} does not exist')
         return 1
 
-    new_metadata_file = get_metadata_filename(metadata_dir, new_image)
+    new_metadata_file = get_metadata_filename(METADATA_DIR, new_image)
     old_metadata_file = os.path.join(
         UNUSED_IMAGES,
         os.path.basename(new_metadata_file),
@@ -331,44 +329,136 @@ def new(
     return 0
 
 
+def valid_str(value: Any) -> bool:
+    return isinstance(value, str) and len(value) > 0
+
+
+def valid_date(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    day = value
+    if len(day) != 8:
+        return False
+    try:
+        datetime.datetime.strptime(day, '%Y%m%d')
+    except ValueError:
+        return False
+    return True
+
+
+def validate(*, config_file: str) -> int:
+    try:
+        with open(config_file) as c:
+            config = json.load(c)
+    except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
+        print(f'Unable to load config_file: {config_file}.', e)
+        return 1
+
+    dates = config.get('dates', None)
+
+    if dates is None or len(dates) == 0:
+        print('No dates set in config')
+        return 1
+
+    metadata_keys = {
+        'alt': valid_str,
+        'camera': valid_str,
+        'date': valid_date,
+        'film': valid_str,
+        'subtitle': valid_str,
+    }
+
+    ret = 0
+    for date in dates:
+        if len(date) != 2:
+            print(f'Entry {date} has the wrong number of fields')
+            ret += 1
+
+        day = date[0]
+        if not valid_date(day):
+            print(f'Entry {date} unable to parse date {day}')
+            ret += 1
+
+        image = date[1]
+
+        if not os.path.exists(os.path.join(IMAGES, image)):
+            print(f'Entry {date}: {image} missing jpg')
+            ret += 1
+
+        metadata_file = get_metadata_filename(METADATA_DIR, image)
+        try:
+            with open(metadata_file) as md:
+                metadata = json.load(md)
+        except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
+            ret += 1
+            print(f'Entry {date} unable to load {metadata_file}: ', e)
+            continue
+
+        for key, validator in metadata_keys.items():
+            if key not in metadata:
+                print(f'{metadata_file} missing key "{key}"')
+                ret += 1
+                continue
+
+            if not validator(metadata[key]):
+                print(
+                    f'{metadata_file} unable to validate'
+                    f': {key} -> {metadata[key]}',
+                )
+                ret += 1
+            del metadata[key]
+
+        if len(metadata) > 0:
+            print(f'{metadata_file} has extra keys {metadata.keys()}')
+            ret += 1
+
+    return ret
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description='generate todays pic site')
     parser.add_argument(
-        '--config',
+        '--config-file',
         help='Path to config file. defaults to ./config.json',
+        default='config.json',
     )
-    parser.add_argument(
-        '--new',
-        help=f'Choose and add new from {UNUSED_IMAGES} for YYYYMMDD',
+    subparsers = parser.add_subparsers(dest='function')
+    sp = subparsers.add_parser(
+        'generate',
+        help='default: Generate static site suitable for gh pages',
     )
-    parser.add_argument(
+
+    sp = subparsers.add_parser(
+        'new',
+        help=f'choose and add new image from {UNUSED_IMAGES} for YYYYMMDD',
+    )
+    sp.add_argument(
+        'new_date',
+        metavar='date',
+        help='YYYYMMDD to add new image',
+    )
+    sp.add_argument(
         '--image',
-        help='Optional. If passed, use a specific image instead of random.',
+        dest='new_image',
+        help='optional. if passed, use a specific image instead of random',
+    )
+
+    sp = subparsers.add_parser(
+        'validate',
+        help='validate config.json',
     )
     args = parser.parse_args(argv)
 
-    # constant metadata
-    config_file = args.config or 'config.json'
-    config = json.load(open(config_file))
-    output_dir = config['output_dir']
-    template = config['template']
-    metadata_dir = config['metadata_dir']
-
-    if args.new:
+    if args.function == 'new':
         return new(
-            new_date=args.new,
+            new_date=args.date,
             new_image=args.image,
-            metadata_dir=metadata_dir,
-            config_file=config_file,
-            config=config,
+            config_file=args.config_file,
         )
-
-    return generate(
-        config=config,
-        metadata_dir=metadata_dir,
-        output_dir=output_dir,
-        template=template,
-    )
+    elif args.function == 'validate':
+        return validate(config_file=args.config_file)
+    else:
+        return generate(config_file=args.config_file)
 
 
 if __name__ == '__main__':
