@@ -15,14 +15,18 @@ METADATA_TEMPLATE = {
     'subtitle': '',
 }
 
+OUTPUT_DIR = 'queued'
+IMAGE_DIR = os.path.join(OUTPUT_DIR, 'images')
+METADATA_DIR = os.path.join(OUTPUT_DIR, 'metadata')
+
 
 def unused(dates: List[Tuple[str, str]], new_image: str) -> bool:
     for date, image in dates:
         if image == new_image:
             print(f'{image} is already used on {date}')
             return False
-        if os.path.exists(os.path.join('converted', new_image)):
-            print(f'{new_image} is already in converted/')
+        if os.path.exists(os.path.join(IMAGE_DIR, new_image)):
+            print(f'{new_image} is already in {IMAGE_DIR}')
             return False
     return True
 
@@ -63,15 +67,16 @@ def main(argv: Optional[List[str]] = None) -> int:
                 prefix, ext = os.path.splitext(name)
                 if ext == '.jpg' and unused(dates, name):
                     print(
-                        f'Moving {args.source_dir}/{name} to converted/{name}',
+                        f'Moving {args.source_dir}/{name} '
+                        f'to {IMAGE_DIR}/{name}',
                     )
                     shutil.move(
                         os.path.join(args.source_dir, name),
-                        os.path.join('converted', name),
+                        os.path.join(IMAGE_DIR, name),
                     )
                     json_name = prefix + os.path.extsep + 'json'
-                    print(f'Creating converted/{json_name}')
-                    with open(os.path.join('converted', json_name), 'w') as f:
+                    print(f'Creating {METADATA_DIR}/{json_name}')
+                    with open(os.path.join(METADATA_DIR, json_name), 'w') as f:
                         json.dump(
                             METADATA_TEMPLATE,
                             f,
