@@ -78,6 +78,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                             sort_keys=True,
                             indent=2,
                         )
+                        f.write(os.linesep)
 
     return 0
 

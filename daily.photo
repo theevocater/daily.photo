@@ -13,8 +13,8 @@ from typing import Optional
 from typing import TypedDict
 
 UNUSED_IMAGES = 'converted'
-IMAGES = 'images'
-METADATA_DIR = 'metadata'
+IMAGES = 'current/images'
+METADATA_DIR = 'current/metadata'
 OUTPUT_DIR = 'generated'
 TEMPLATE = 'template.html'
 

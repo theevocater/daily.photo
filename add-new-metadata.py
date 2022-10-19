@@ -26,6 +26,7 @@ def create_empty_metadata(json_name: str) -> bool:
             sort_keys=True,
             indent=2,
         )
+        f.write(os.linesep)
     return True
 
 
