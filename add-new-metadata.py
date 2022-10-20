@@ -13,6 +13,10 @@ METADATA_TEMPLATE = {
     'subtitle': '',
 }
 
+OUTPUT_DIR = 'queued'
+IMAGE_DIR = os.path.join(OUTPUT_DIR, 'images')
+METADATA_DIR = os.path.join(OUTPUT_DIR, 'metadata')
+
 
 def edit_json(json_name: str) -> int:
     return subprocess.call(['vim', json_name])
@@ -42,7 +46,9 @@ def update(image_name: str, json_name: str) -> int:
             edit = True
     if edit:
         print(f'editing {os.path.basename(image_name)}')
-        input()
+        inp = input('s?')
+        if inp == 's':
+            return 0
         return edit_json(json_name)
     else:
         print(f'No need to edit {json_name}')
@@ -51,12 +57,12 @@ def update(image_name: str, json_name: str) -> int:
 
 def main(argv: Optional[List[str]] = None) -> int:
     rets = 0
-    for file in os.listdir('converted/'):
+    for file in os.listdir(IMAGE_DIR):
         prefix, ext = os.path.splitext(file)
         if ext == '.jpg':
             rets += update(
-                os.path.join('converted', file),
-                os.path.join('converted', prefix + os.path.extsep + 'json'),
+                os.path.join(IMAGE_DIR, file),
+                os.path.join(METADATA_DIR, prefix + os.path.extsep + 'json'),
             )
 
     return 0
