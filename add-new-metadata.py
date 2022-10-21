@@ -2,6 +2,7 @@
 import json
 import os
 import subprocess
+import sys
 from typing import List
 from typing import Optional
 
@@ -45,6 +46,13 @@ def update(image_name: str, json_name: str) -> int:
         if v == '':
             edit = True
     if edit:
+        json.dump(
+            metadata,
+            sys.stdout,
+            sort_keys=True,
+            indent=2,
+        )
+        print()
         print(f'editing {os.path.basename(image_name)}')
         inp = input('s?')
         if inp == 's':
