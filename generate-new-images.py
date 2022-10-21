@@ -31,6 +31,30 @@ def unused(dates: List[Tuple[str, str]], new_image: str) -> bool:
     return True
 
 
+def write_metadata(json_name: str) -> int:
+    print(f'Creating {json_name}')
+    try:
+        with open(json_name, 'w') as f:
+            json.dump(
+                METADATA_TEMPLATE,
+                f,
+                sort_keys=True,
+                indent=2,
+            )
+            f.write(os.linesep)
+    except (
+        FileNotFoundError,
+        json.decoder.JSONDecodeError,
+    ) as e:
+        print(
+            f'Unable to write metadata: {json_name}.',
+            e,
+        )
+        return 1
+
+    return 0
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(
         description='copy and create metadata files for new images',
@@ -59,7 +83,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     if not os.path.exists(args.source_dir):
         print(f'Error: unable to list {args.source_dir}')
-        return -1
+        return 1
     with os.scandir(args.source_dir) as it:
         for entry in it:
             if entry.is_file:
@@ -74,16 +98,14 @@ def main(argv: Optional[List[str]] = None) -> int:
                         os.path.join(args.source_dir, name),
                         os.path.join(IMAGE_DIR, name),
                     )
-                    json_name = prefix + os.path.extsep + 'json'
-                    print(f'Creating {METADATA_DIR}/{json_name}')
-                    with open(os.path.join(METADATA_DIR, json_name), 'w') as f:
-                        json.dump(
-                            METADATA_TEMPLATE,
-                            f,
-                            sort_keys=True,
-                            indent=2,
-                        )
-                        f.write(os.linesep)
+                    ret = write_metadata(
+                        os.path.join(
+                            METADATA_DIR,
+                            prefix + os.path.extsep + 'json',
+                        ),
+                    )
+                    if ret != 0:
+                        return ret
 
     return 0
 
