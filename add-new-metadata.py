@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
+import argparse
 import json
 import os
 import subprocess
 import sys
 from typing import List
 from typing import Optional
+from typing import Set
 
 METADATA_TEMPLATE = {
     'alt': '',
@@ -13,10 +15,6 @@ METADATA_TEMPLATE = {
     'film': '',
     'subtitle': '',
 }
-
-OUTPUT_DIR = 'queued'
-IMAGE_DIR = os.path.join(OUTPUT_DIR, 'images')
-METADATA_DIR = os.path.join(OUTPUT_DIR, 'metadata')
 
 
 def edit_json(json_name: str) -> int:
@@ -35,16 +33,31 @@ def create_empty_metadata(json_name: str) -> bool:
     return True
 
 
-def update(image_name: str, json_name: str) -> int:
+def update(
+    image_name: str,
+    json_name: str,
+    always_edit: bool,
+    fields: Optional[Set[str]],
+) -> int:
     if not os.path.exists(json_name):
         print('Creating missing {json_name}')
         create_empty_metadata(json_name)
-    with open(json_name) as f:
-        metadata = json.load(f)
-    edit = False
+    try:
+        with open(json_name) as f:
+            metadata = json.load(f)
+    except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
+        print(f'Unable to load metadata file: {json_name}.', e)
+        return 1
+
+    edit = always_edit
     for k, v in metadata.items():
+        if edit:
+            break
+        if fields and k not in fields:
+            continue
         if v == '':
             edit = True
+
     if edit:
         json.dump(
             metadata,
@@ -64,6 +77,34 @@ def update(image_name: str, json_name: str) -> int:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    parser = argparse.ArgumentParser(
+        description='copy and create metadata files for new images',
+    )
+    parser.add_argument(
+        '--config-file',
+        help='Path to config file. defaults to ./config.json',
+        default='config.json',
+    )
+    parser.add_argument(
+        '--always-edit',
+        help='Comma separate list of fields to check if a file needs editing.',
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        '--fields',
+        help='Comma separate list of fields to check if a file needs editing.',
+        default=None,
+    )
+    parser.add_argument(
+        'source_dir',
+        help='Source directory for images',
+    )
+    args = parser.parse_args(argv)
+    fields = args.fields.split(',') if args.fields else None
+    OUTPUT_DIR = args.source_dir
+    IMAGE_DIR = os.path.join(OUTPUT_DIR, 'images')
+    METADATA_DIR = os.path.join(OUTPUT_DIR, 'metadata')
     rets = 0
     for file in os.listdir(IMAGE_DIR):
         prefix, ext = os.path.splitext(file)
@@ -71,6 +112,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             rets += update(
                 os.path.join(IMAGE_DIR, file),
                 os.path.join(METADATA_DIR, prefix + os.path.extsep + 'json'),
+                args.always_edit,
+                fields,
             )
 
     return 0
