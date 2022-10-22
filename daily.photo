@@ -12,7 +12,8 @@ from typing import List
 from typing import Optional
 from typing import TypedDict
 
-UNUSED_IMAGES = 'converted'
+UNUSED_IMAGES = 'queued/images'
+UNUSED_METADATA = 'queued/metadata'
 IMAGES = 'current/images'
 METADATA_DIR = 'current/metadata'
 OUTPUT_DIR = 'generated'
@@ -286,32 +287,21 @@ def new(
             return 1
 
     if new_image is None:
-        new_image = random.choice(
-            [
-                image
-                for image in os.listdir(
-                    UNUSED_IMAGES,
-                )
-                if image[-4:] != 'json'
-            ],
-        )
+        new_image = random.choice(os.listdir(UNUSED_IMAGES))
     else:
         new_image = os.path.basename(new_image)
 
     old_image_path = os.path.join(UNUSED_IMAGES, new_image)
-    new_image_path = os.path.join(IMAGES, new_image)
     if not os.path.exists(old_image_path):
         print(f'Error: {old_image_path} does not exist')
         return 1
+    new_image_path = os.path.join(IMAGES, new_image)
 
-    new_metadata_file = get_metadata_filename(METADATA_DIR, new_image)
-    old_metadata_file = os.path.join(
-        UNUSED_IMAGES,
-        os.path.basename(new_metadata_file),
-    )
+    old_metadata_file = get_metadata_filename(UNUSED_METADATA, new_image)
     if not os.path.exists(old_metadata_file):
         print(f'Error: {old_metadata_file} does not exist')
         return 1
+    new_metadata_file = get_metadata_filename(METADATA_DIR, new_image)
 
     print(f'Moving {old_image_path} to {new_image_path}')
     shutil.move(old_image_path, new_image_path)
@@ -434,13 +424,13 @@ def main(argv: Optional[List[str]] = None) -> int:
         help=f'choose and add new image from {UNUSED_IMAGES} for YYYYMMDD',
     )
     sp.add_argument(
-        'new_date',
+        'date',
         metavar='date',
         help='YYYYMMDD to add new image',
     )
     sp.add_argument(
         '--image',
-        dest='new_image',
+        dest='image',
         help='optional. if passed, use a specific image instead of random',
     )
 
