@@ -16,6 +16,7 @@ UNUSED_IMAGES = 'converted'
 IMAGES = 'current/images'
 METADATA_DIR = 'current/metadata'
 OUTPUT_DIR = 'generated'
+OUTPUT_IMAGES = 'images'
 TEMPLATE = 'template.html'
 
 RSS_FEED_HEADER = """\
@@ -138,7 +139,7 @@ def generate_day(
 
     # symlink this days image to the output directory
     intput_image = os.path.join('..', '..', IMAGES, image)
-    output_image = os.path.join(output_dir, IMAGES, image)
+    output_image = os.path.join(output_dir, OUTPUT_IMAGES, image)
     if not os.path.exists(output_image):
         if os.path.lexists(output_image):
             # fix broken links
@@ -150,7 +151,7 @@ def generate_day(
         {
             'yesterday': yesterday_text,
             'tomorrow': tomorrow_text,
-            'image': os.path.join(IMAGES, image),
+            'image': os.path.join(OUTPUT_IMAGES, image),
             'alt': metadata['alt'],
             'subtitle': metadata['subtitle'],
             'date': today.strftime('%B %d, %Y'),
@@ -170,7 +171,7 @@ def generate_day(
         link=f'https://daily.photo/{today.strftime("%Y%m%d")}.html',
         date=rss_date(today),
         alt=metadata['alt'],
-        img_link=f'https://daily.photo/images/{image}',
+        img_link=f'https://daily.photo/{OUTPUT_IMAGES}/{image}',
     )
 
 
@@ -189,7 +190,7 @@ def setup_output_dir(output_dir: str) -> bool:
         print(f'Creating {output_dir}')
         os.mkdir(output_dir)
 
-    images = os.path.join(output_dir, IMAGES)
+    images = os.path.join(output_dir, OUTPUT_IMAGES)
     if not os.path.exists(images):
         print(f'Creating {images}')
         os.mkdir(images)
