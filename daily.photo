@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import datetime
+import functools
 import json
 import os
 import random
@@ -8,6 +9,7 @@ import shutil
 import string
 import sys
 from typing import Any
+from typing import Dict
 from typing import List
 from typing import Optional
 from typing import TypedDict
@@ -62,6 +64,16 @@ class TemplateSubstitutions(TypedDict):
     shot_date: str
     camera: str
     film: str
+
+
+@functools.cache
+def read_config(config_file: str) -> Optional[Dict[str, Any]]:
+    try:
+        with open(config_file) as c:
+            return json.load(c)
+    except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
+        print(f'Unable to load config_file: {config_file}.', e)
+        return None
 
 
 def generate_html(
@@ -213,7 +225,10 @@ def generate(
     *,
     config_file: str,
 ) -> int:
-    config = json.load(open(config_file))
+    config = read_config(config_file)
+    if config is None:
+        return 1
+
     print('Generating site')
     if not setup_output_dir(OUTPUT_DIR):
         return 1
@@ -276,7 +291,10 @@ def new(
     """
     Choose and move a new image to IMAGES
     """
-    config = json.load(open(config_file))
+    config = read_config(config_file)
+    if config is None:
+        return 1
+
     # Detect if a date or image has been used before
     for date, image in config['dates']:
         if date == new_date:
@@ -338,11 +356,8 @@ def valid_date(value: Any) -> bool:
 
 
 def validate(*, config_file: str) -> int:
-    try:
-        with open(config_file) as c:
-            config = json.load(c)
-    except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
-        print(f'Unable to load config_file: {config_file}.', e)
+    config = read_config(config_file)
+    if config is None:
         return 1
 
     dates = config.get('dates', None)
@@ -425,7 +440,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     sp.add_argument(
         'date',
-        metavar='date',
+        nargs='*',
         help='YYYYMMDD to add new image',
     )
     sp.add_argument(
@@ -441,11 +456,26 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     if args.function == 'new':
-        return new(
-            new_date=args.date,
-            new_image=args.image,
-            config_file=args.config_file,
-        )
+
+        if args.date == []:
+            config = read_config(args.config_file)
+            if config is None:
+                return 1
+            dates = config['dates']
+            sorted(dates, key=lambda x: x[0])
+            last_day = datetime.datetime.strptime(dates[-1][0], '%Y%m%d')
+            args.date = [
+                (last_day + datetime.timedelta(days=1)).strftime('%Y%m%d'),
+            ]
+
+        for date in args.date:
+            new(
+                new_date=date,
+                new_image=args.image,
+                config_file=args.config_file,
+            )
+
+        return 0
     elif args.function == 'validate':
         return validate(config_file=args.config_file)
     else:
