@@ -458,7 +458,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     if args.function == 'new':
         if args.image is None:
-            args.image = [None]*(len(args.date) or 1)
+            args.image = [None] * (len(args.date) or 1)
 
         if args.date == []:
             config = read_config(args.config_file)
@@ -469,7 +469,9 @@ def main(argv: Optional[List[str]] = None) -> int:
             last_day = datetime.datetime.strptime(dates[-1][0], '%Y%m%d')
             # Generate as many dates as we have images or just 1
             args.date = [
-                (last_day + datetime.timedelta(days=(i+1))).strftime('%Y%m%d')
+                (last_day + datetime.timedelta(days=(i + 1))).strftime(
+                    '%Y%m%d',
+                )
                 for i in range(0, len(args.image))
             ]
 
