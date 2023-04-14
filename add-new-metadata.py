@@ -18,6 +18,9 @@ METADATA_TEMPLATE = {
 
 
 def edit_json(json_name: str) -> int:
+    inp = input('s?')
+    if inp == 's':
+        return 0
     return subprocess.call(['vim', json_name])
 
 
@@ -45,9 +48,12 @@ def update(
     try:
         with open(json_name) as f:
             metadata = json.load(f)
-    except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
+    except FileNotFoundError as e:
         print(f'Unable to load metadata file: {json_name}.', e)
         return 1
+    except json.decoder.JSONDecodeError as e:
+        print(f'Unable to parse metadata file: {json_name}.', e)
+        return edit_json(json_name)
 
     edit = always_edit
     for k, v in metadata.items():
@@ -67,9 +73,6 @@ def update(
         )
         print()
         print(f'editing {os.path.basename(image_name)}')
-        inp = input('s?')
-        if inp == 's':
-            return 0
         return edit_json(json_name)
     else:
         print(f'No need to edit {json_name}')
