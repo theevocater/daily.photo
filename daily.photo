@@ -446,6 +446,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     sp.add_argument(
         '--image',
         dest='image',
+        nargs='*',
         help='optional. if passed, use a specific image instead of random',
     )
 
@@ -456,6 +457,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     if args.function == 'new':
+        if args.image is None:
+            args.image = [None] * (len(args.date) or 1)
 
         if args.date == []:
             config = read_config(args.config_file)
@@ -464,14 +467,18 @@ def main(argv: Optional[List[str]] = None) -> int:
             dates = config['dates']
             sorted(dates, key=lambda x: x[0])
             last_day = datetime.datetime.strptime(dates[-1][0], '%Y%m%d')
+            # Generate as many dates as we have images or just 1
             args.date = [
-                (last_day + datetime.timedelta(days=1)).strftime('%Y%m%d'),
+                (last_day + datetime.timedelta(days=(i + 1))).strftime(
+                    '%Y%m%d',
+                )
+                for i in range(0, len(args.image))
             ]
 
-        for date in args.date:
+        for date, image in zip(args.date, args.image):
             new(
                 new_date=date,
-                new_image=args.image,
+                new_image=image,
                 config_file=args.config_file,
             )
 
