@@ -86,7 +86,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 1
     with os.scandir(args.source_dir) as it:
         for entry in it:
-            if entry.is_file:
+            if entry.is_file():
                 name = entry.name
                 prefix, ext = os.path.splitext(name)
                 if ext == '.jpg' and unused(dates, name):
