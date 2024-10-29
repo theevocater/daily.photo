@@ -1,4 +1,4 @@
-* {
+body {
   background: #222222;
   color: white;
   font-family: sans-serif;
@@ -18,9 +18,16 @@ main {
 
 .arrow {
   width: 5%;
+  height: 10em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   text-align: center;
   font-weight: bold;
   font-size: 2em;
+  background: #333333;
+  color: white;
 }
 
 #main {
@@ -55,6 +62,6 @@ img {
   text-align: right
 }
 
-.header {
+.meta_header {
   color: grey;
 }

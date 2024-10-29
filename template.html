@@ -19,28 +19,28 @@
       <h1>$date</h1>
     </header>
     <main>
-      <div class="arrow">$yesterday</div>
+      <a class="arrow" href="$yesterday"><div>&lt;</div></a>
       <div id="main">
         <div id="img"><img src="$image" alt="$alt" title="$alt"></div>
         <div id="alt">
-          <h2 class="title">$subtitle</h2>
+          <h2>$subtitle</h2>
         </div>
         <div id="metadata">
           <div>
-            <div class="header">Taken</div>
+            <div class="meta_header">Taken</div>
             <div>$shot_date</div>
           </div>
           <div>
-            <div class="header">Film</div>
+            <div class="meta_header">Film</div>
             <div>$film</div>
           </div>
           <div>
-            <div class="header">Camera</div>
+            <div class="meta_header">Camera</div>
             <div>$camera</div>
           </div>
         </div>
       </div>
-      <div class="arrow">$tomorrow</div>
+      <a class="arrow" href="$tomorrow"><div>&gt;</div></a>
     </main>
   </body>
 </html>
