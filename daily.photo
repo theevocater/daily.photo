@@ -119,25 +119,20 @@ def generate_day(
 
     print(f"Generating {output_name}")
 
-    yesterday = today - datetime.timedelta(days=1)
-    tomorrow = today + datetime.timedelta(days=1)
-
     with open(metadata_file) as f:
         metadata = json.load(f)
 
+    # TODO get rid of the parallel index.html and the lastday.html. its
+    # confusing
+    yesterday = today - datetime.timedelta(days=1)
     if no_prev:
-        yesterday_text = "&lt;-"
-    else:
-        yesterday_text = '<a href="{}">&lt;-</a>'.format(
-            format_filename("/", yesterday),
-        )
+        yesterday = today
+    yesterday_text = format_filename("/", yesterday)
 
+    tomorrow = today + datetime.timedelta(days=1)
     if no_next or index:
-        tomorrow_text = "-&gt;"
-    else:
-        tomorrow_text = '<a href="{}">-&gt;</a>'.format(
-            format_filename("/", tomorrow),
-        )
+        tomorrow = today
+    tomorrow_text = format_filename("/", tomorrow)
 
     try:
         shot_date = photo_date(metadata.get("date"))
