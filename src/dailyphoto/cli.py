@@ -23,9 +23,7 @@ def main(argv: list[str] | None = None) -> int:
 
     sp = subparsers.add_parser(
         "new",
-        help=f"choose and add new image from {
-            config.UNUSED_IMAGES
-        } for YYYYMMDD",
+        help=f"choose and add new image from {config.UNUSED_IMAGES} for YYYYMMDD",
     )
     sp.add_argument(
         "date",

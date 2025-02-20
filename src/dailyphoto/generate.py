@@ -36,7 +36,7 @@ RSS_FEED_TRAILER = "\n</feed>\n"
 
 
 def format_filename(output_dir: str, day: datetime.datetime) -> str:
-    return os.path.join(output_dir, f'{day.strftime("%Y%m%d")}.html')
+    return os.path.join(output_dir, f"{day.strftime('%Y%m%d')}.html")
 
 
 class TemplateSubstitutions(TypedDict):
@@ -115,7 +115,7 @@ def generate_day(
     try:
         shot_date = photo_date(metadata.get("date"))
     except ValueError:
-        print(f'Unable to parse {metadata_file} date: {metadata.get("date")}')
+        print(f"Unable to parse {metadata_file} date: {metadata.get('date')}")
         # TODO: error handling shouldn't be immediate exit. need to better
         # collect and bubble errors
         sys.exit(1)
@@ -151,7 +151,7 @@ def generate_day(
 
     return RSS_FEED_ENTRY.format(
         title=metadata["subtitle"],
-        link=f'https://daily.photo/{today.strftime("%Y%m%d")}.html',
+        link=f"https://daily.photo/{today.strftime('%Y%m%d')}.html",
         date=rss_date(today),
         alt=metadata["alt"],
         img_link=f"https://daily.photo/{config.OUTPUT_IMAGES}/{image}",

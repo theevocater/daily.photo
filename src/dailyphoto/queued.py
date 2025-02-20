@@ -74,10 +74,7 @@ def queue_images(config_file: str, source_dir: str) -> int:
                 prefix, ext = os.path.splitext(name)
                 if ext == ".jpg" and unused(dates, name):
                     print(
-                        f"Moving {
-                            source_dir
-                        }/{name} "
-                        f"to {IMAGE_DIR}/{name}",
+                        f"Moving {source_dir}/{name} to {IMAGE_DIR}/{name}",
                     )
                     shutil.move(
                         os.path.join(source_dir, name),

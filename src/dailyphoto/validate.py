@@ -79,10 +79,7 @@ def validate(*, config_file: str) -> int:
 
             if not validator(metadata[key]):
                 print(
-                    f"{metadata_file} unable to validate"
-                    f": {
-                        key
-                    } -> {metadata[key]}",
+                    f"{metadata_file} unable to validate: {key} -> {metadata[key]}",
                 )
                 ret += 1
             del metadata[key]
