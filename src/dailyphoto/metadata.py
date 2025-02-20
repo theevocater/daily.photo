@@ -15,14 +15,14 @@ METADATA_TEMPLATE = {
 
 
 def edit_json(json_name: str, image_name: str, window_id: str) -> int:
-    inp = input("sq?")
+    inp = input("[e]dit,[s]kip,[q]uit?")
     if inp == "s":
         return 0
     if inp == "q":
         return -1
     kitty.open_image(image_name, window_id)
 
-    return subprocess.call(["vim", json_name])
+    return subprocess.call(["nvim", json_name])
 
 
 def create_empty_metadata(json_name: str) -> bool:
