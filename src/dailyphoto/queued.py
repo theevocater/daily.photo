@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
-import argparse
 import json
 import os
 import shutil
+
+from . import config
 
 METADATA_TEMPLATE = {
     "alt": "",
@@ -12,9 +12,8 @@ METADATA_TEMPLATE = {
     "subtitle": "",
 }
 
-OUTPUT_DIR = "queued"
-IMAGE_DIR = os.path.join(OUTPUT_DIR, "images")
-METADATA_DIR = os.path.join(OUTPUT_DIR, "metadata")
+IMAGE_DIR = config.UNUSED_IMAGES
+METADATA_DIR = config.UNUSED_METADATA
 
 
 def unused(dates: list[tuple[str, str]], new_image: str) -> bool:
@@ -52,25 +51,12 @@ def write_metadata(json_name: str) -> int:
     return 0
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="copy and create metadata files for new images",
-    )
-    parser.add_argument(
-        "--config-file",
-        help="Path to config file. defaults to ./config.json",
-        default="config.json",
-    )
-    parser.add_argument(
-        "source_dir",
-        help="Source directory for images",
-    )
-    args = parser.parse_args(argv)
+def queue_images(config_file: str, source_dir: str) -> int:
     try:
-        with open(args.config_file) as c:
+        with open(config_file) as c:
             config = json.load(c)
     except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
-        print(f"Unable to load config_file: {args.config_file}.", e)
+        print(f"Unable to load config_file: {config_file}.", e)
         return 1
 
     dates = config.get("dates", None)
@@ -78,23 +64,20 @@ def main(argv: list[str] | None = None) -> int:
         print("Unable to get dates from config")
         return 1
 
-    if not os.path.exists(args.source_dir):
-        print(f"Error: unable to list {args.source_dir}")
+    if not os.path.exists(source_dir):
+        print(f"Error: unable to list {source_dir}")
         return 1
-    with os.scandir(args.source_dir) as it:
+    with os.scandir(source_dir) as it:
         for entry in it:
             if entry.is_file():
                 name = entry.name
                 prefix, ext = os.path.splitext(name)
                 if ext == ".jpg" and unused(dates, name):
                     print(
-                        f"Moving {
-                            args.source_dir
-                        }/{name} "
-                        f"to {IMAGE_DIR}/{name}",
+                        f"Moving {source_dir}/{name} to {IMAGE_DIR}/{name}",
                     )
                     shutil.move(
-                        os.path.join(args.source_dir, name),
+                        os.path.join(source_dir, name),
                         os.path.join(IMAGE_DIR, name),
                     )
                     ret = write_metadata(
@@ -107,7 +90,3 @@ def main(argv: list[str] | None = None) -> int:
                         return ret
 
     return 0
-
-
-if __name__ == "__main__":
-    exit(main())

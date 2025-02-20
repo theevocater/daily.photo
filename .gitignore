@@ -1,3 +1,10 @@
 converted/
 unused/
 generated/
+
+*.pyc
+.venv/
+.mypy_cache/
+src/dailyphoto.egg-info/
+
+build/

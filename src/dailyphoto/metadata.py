@@ -1,9 +1,9 @@
-#!/usr/bin/env python3
-import argparse
 import json
 import os
 import subprocess
 import sys
+
+from . import kitty
 
 METADATA_TEMPLATE = {
     "alt": "",
@@ -14,11 +14,15 @@ METADATA_TEMPLATE = {
 }
 
 
-def edit_json(json_name: str) -> int:
-    inp = input("s?")
+def edit_json(json_name: str, image_name: str, window_id: str) -> int:
+    inp = input("[e]dit,[s]kip,[q]uit?")
     if inp == "s":
         return 0
-    return subprocess.call(["vim", json_name])
+    if inp == "q":
+        return -1
+    kitty.open_image(image_name, window_id)
+
+    return subprocess.call(["nvim", json_name])
 
 
 def create_empty_metadata(json_name: str) -> bool:
@@ -37,6 +41,7 @@ def update(
     image_name: str,
     json_name: str,
     always_edit: bool,
+    window_id: str,
     fields: set[str] | None,
 ) -> int:
     if not os.path.exists(json_name):
@@ -50,7 +55,7 @@ def update(
         return 1
     except json.decoder.JSONDecodeError as e:
         print(f"Unable to parse metadata file: {json_name}.", e)
-        return edit_json(json_name)
+        return edit_json(json_name, image_name, window_id)
 
     edit = always_edit
     for k, v in metadata.items():
@@ -70,54 +75,39 @@ def update(
         )
         print()
         print(f"editing {os.path.basename(image_name)}")
-        return edit_json(json_name)
+        return edit_json(json_name, image_name, window_id)
     else:
         print(f"No need to edit {json_name}")
         return 0
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="copy and create metadata files for new images",
-    )
-    parser.add_argument(
-        "--config-file",
-        help="Path to config file. defaults to ./config.json",
-        default="config.json",
-    )
-    parser.add_argument(
-        "--always-edit",
-        help="Comma separate list of fields to check if a file needs editing.",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-    )
-    parser.add_argument(
-        "--fields",
-        help="Comma separate list of fields to check if a file needs editing.",
-        default=None,
-    )
-    parser.add_argument(
-        "source_dir",
-        help="Source directory for images",
-    )
-    args = parser.parse_args(argv)
-    fields = args.fields.split(",") if args.fields else None
-    OUTPUT_DIR = args.source_dir
-    IMAGE_DIR = os.path.join(OUTPUT_DIR, "images")
-    METADATA_DIR = os.path.join(OUTPUT_DIR, "metadata")
+def metadata(
+    *,
+    always_edit: bool,
+    fields_csv: str | None,
+    source_dir: str,
+) -> int:
+    fields = set(fields_csv.split(",")) if fields_csv else None
+
+    id = kitty.new_window()
+
+    output_dir = source_dir
+    image_dir = os.path.join(output_dir, "images")
+    metadata_dir = os.path.join(output_dir, "metadata")
     rets = 0
-    for file in os.listdir(IMAGE_DIR):
+    for file in os.listdir(image_dir):
         prefix, ext = os.path.splitext(file)
         if ext == ".jpg":
-            rets += update(
-                os.path.join(IMAGE_DIR, file),
-                os.path.join(METADATA_DIR, prefix + os.path.extsep + "json"),
-                args.always_edit,
+            ret = update(
+                os.path.join(image_dir, file),
+                os.path.join(metadata_dir, prefix + os.path.extsep + "json"),
+                always_edit,
+                id,
                 fields,
             )
-
-    return 0
-
-
-if __name__ == "__main__":
-    exit(main())
+            # -1 is the signal to quit since processes return positive numbers
+            if ret < 0:
+                break
+            rets += ret
+    kitty.close_window(id)
+    return rets

@@ -1,0 +1,13 @@
+[project]
+name = "dailyphoto"
+version = "0.1.0"
+description = "Tool to create https://daily.photo"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+[project.scripts]
+dailyphoto = "dailyphoto:cli.main"
+
+[tool.uv]
+package = true
