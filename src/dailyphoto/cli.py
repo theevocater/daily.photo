@@ -70,6 +70,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    conf = config.read_config(args.config_file)
+    if conf is None:
+        return 1
+
     if args.function == "new":
         return new(
             images=args.image,
@@ -77,7 +81,7 @@ def main(argv: list[str] | None = None) -> int:
             config_file=args.config_file,
         )
     elif args.function == "validate":
-        return validate(config_file=args.config_file)
+        return validate(conf=conf)
     elif args.function == "metadata":
         return metadata(
             always_edit=args.always_edit,
@@ -86,8 +90,8 @@ def main(argv: list[str] | None = None) -> int:
         )
     elif args.function == "queue":
         return queue_images(
-            config_file=args.config_file,
+            conf=conf,
             source_dir=args.source_dir,
         )
     else:
-        return generate(config_file=args.config_file)
+        return generate(conf=conf)

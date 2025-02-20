@@ -4,14 +4,7 @@ import subprocess
 import sys
 
 from . import kitty
-
-METADATA_TEMPLATE = {
-    "alt": "",
-    "camera": "",
-    "date": "",
-    "film": "",
-    "subtitle": "",
-}
+from .config import METADATA_TEMPLATE
 
 
 def edit_json(json_name: str, image_name: str, window_id: str) -> int:
@@ -58,9 +51,15 @@ def update(
         return edit_json(json_name, image_name, window_id)
 
     edit = always_edit
+    if fields is None:
+        # if we aren't editing a specific field, calculate symmetric
+        # distance of key sets to find if there are missing keys
+        missing_fields = set(metadata.keys()) ^ set(METADATA_TEMPLATE.keys())
+        if len(missing_fields) > 0:
+            print(f"{json_name} is missing {missing_fields}")
+        edit = len(missing_fields) > 0
+
     for k, v in metadata.items():
-        if edit:
-            break
         if fields and k not in fields:
             continue
         if v == "":
