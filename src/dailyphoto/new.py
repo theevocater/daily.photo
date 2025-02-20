@@ -51,7 +51,7 @@ def new(
 def new_image(
     *,
     new_date: str,
-    new_image: str | None,
+    new_image: str,
     config_file: str,
 ) -> int:
     """
@@ -70,7 +70,7 @@ def new_image(
             print(f"Error: {new_image} was already used on {date}")
             return 1
 
-    if new_image is None:
+    if new_image == "":
         new_image = random.choice(os.listdir(config.UNUSED_IMAGES))
     else:
         new_image = os.path.basename(new_image)

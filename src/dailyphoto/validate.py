@@ -6,7 +6,6 @@ from typing import Any
 from .config import get_metadata_filename
 from .config import IMAGES
 from .config import METADATA_DIR
-from .config import read_config
 
 
 def valid_str(value: Any) -> bool:
@@ -26,12 +25,8 @@ def valid_date(value: Any) -> bool:
     return True
 
 
-def validate(*, config_file: str) -> int:
-    config = read_config(config_file)
-    if config is None:
-        return 1
-
-    dates = config.get("dates", None)
+def validate(*, conf: dict[str, Any]) -> int:
+    dates = conf.get("dates", None)
 
     if dates is None or len(dates) == 0:
         print("No dates set in config")

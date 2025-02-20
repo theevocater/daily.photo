@@ -3,9 +3,15 @@ import json
 import os
 import string
 import sys
+from typing import Any
 from typing import TypedDict
 
-from . import config
+from .config import get_metadata_filename
+from .config import IMAGES
+from .config import METADATA_DIR
+from .config import OUTPUT_DIR
+from .config import OUTPUT_IMAGES
+from .config import TEMPLATE
 
 RSS_FEED_HEADER = """\
 <?xml version="1.0" encoding="utf-8"?>
@@ -81,36 +87,24 @@ def rss_date(date: datetime.datetime) -> str:
 
 def generate_day(
     *,
-    today: datetime.datetime,
+    prev_day: datetime.datetime,
+    current_day: datetime.datetime,
+    next_day: datetime.datetime,
     image: str,
     metadata_file: str,
     template: str,
     index: bool,
-    no_next: bool,
-    no_prev: bool,
     output_dir: str,
 ) -> str:
     if index:
         output_name = os.path.join(output_dir, "index.html")
     else:
-        output_name = format_filename(output_dir, today)
+        output_name = format_filename(output_dir, current_day)
 
     print(f"Generating {output_name}")
 
     with open(metadata_file) as f:
         metadata = json.load(f)
-
-    # TODO get rid of the parallel index.html and the lastday.html. its
-    # confusing
-    yesterday = today - datetime.timedelta(days=1)
-    if no_prev:
-        yesterday = today
-    yesterday_text = format_filename("/", yesterday)
-
-    tomorrow = today + datetime.timedelta(days=1)
-    if no_next or index:
-        tomorrow = today
-    tomorrow_text = format_filename("/", tomorrow)
 
     try:
         shot_date = photo_date(metadata.get("date"))
@@ -121,8 +115,8 @@ def generate_day(
         sys.exit(1)
 
     # symlink this days image to the output directory
-    intput_image = os.path.join("..", "..", config.IMAGES, image)
-    output_image = os.path.join(output_dir, config.OUTPUT_IMAGES, image)
+    intput_image = os.path.join("..", "..", IMAGES, image)
+    output_image = os.path.join(output_dir, OUTPUT_IMAGES, image)
     if not os.path.exists(output_image):
         if os.path.lexists(output_image):
             # fix broken links
@@ -132,12 +126,12 @@ def generate_day(
     generate_html(
         template,
         {
-            "yesterday": yesterday_text,
-            "tomorrow": tomorrow_text,
-            "image": os.path.join(config.OUTPUT_IMAGES, image),
+            "yesterday": format_filename("/", prev_day),
+            "tomorrow": format_filename("/", next_day),
+            "image": os.path.join(OUTPUT_IMAGES, image),
             "alt": metadata["alt"],
             "subtitle": metadata["subtitle"],
-            "date": today.strftime("%B %d, %Y"),
+            "date": current_day.strftime("%B %d, %Y"),
             "shot_date": shot_date,
             "camera": metadata.get("camera", ""),
             "film": metadata.get("film", ""),
@@ -151,10 +145,10 @@ def generate_day(
 
     return RSS_FEED_ENTRY.format(
         title=metadata["subtitle"],
-        link=f"https://daily.photo/{today.strftime('%Y%m%d')}.html",
-        date=rss_date(today),
+        link=f"https://daily.photo/{current_day.strftime('%Y%m%d')}.html",
+        date=rss_date(current_day),
         alt=metadata["alt"],
-        img_link=f"https://daily.photo/{config.OUTPUT_IMAGES}/{image}",
+        img_link=f"https://daily.photo/{OUTPUT_IMAGES}/{image}",
     )
 
 
@@ -166,7 +160,7 @@ def setup_output_dir(output_dir: str) -> bool:
         print(f"Creating {output_dir}")
         os.mkdir(output_dir)
 
-    images = os.path.join(output_dir, config.OUTPUT_IMAGES)
+    images = os.path.join(output_dir, OUTPUT_IMAGES)
     if not os.path.exists(images):
         print(f"Creating {images}")
         os.mkdir(images)
@@ -186,61 +180,61 @@ def setup_output_dir(output_dir: str) -> bool:
 
 def generate(
     *,
-    config_file: str,
+    conf: dict[str, Any],
 ) -> int:
-    conf = config.read_config(config_file)
-    if conf is None:
-        return 1
-
     print("Generating site")
-    if not setup_output_dir(config.OUTPUT_DIR):
+    if not setup_output_dir(OUTPUT_DIR):
         return 1
 
     rss_feed = RSS_FEED_HEADER.format(
         date=rss_date(datetime.datetime.now()),
     )
 
-    no_prev = True
-    no_next = False
-    for date, image in conf["dates"]:
+    dates = conf["dates"]
+    for i, (date, image) in enumerate(dates):
         today = datetime.datetime.strptime(date, "%Y%m%d")
-        metadata_file = config.get_metadata_filename(
-            config.METADATA_DIR,
+        metadata_file = get_metadata_filename(
+            METADATA_DIR,
             image,
         )
 
-        if conf["dates"][-1][0] == date:
+        # Determine previous, current, and next days
+        if i == 0:
+            prev_day = today
+        else:
+            prev_day = datetime.datetime.strptime(dates[i - 1][0], "%Y%m%d")
+
+        if i == len(dates) - 1:
+            next_day = today
+        else:
+            next_day = datetime.datetime.strptime(dates[i + 1][0], "%Y%m%d")
+
+        if i == len(dates) - 1:
             # Last day we need to generate the index and no anchor
-            # The index isn't included in the RSS feed
-            no_next = True
             generate_day(
-                today=today,
+                prev_day=prev_day,
+                current_day=today,
+                next_day=next_day,
                 image=image,
                 index=True,
                 metadata_file=metadata_file,
-                no_next=no_next,
-                no_prev=no_prev,
-                template=config.TEMPLATE,
-                output_dir=config.OUTPUT_DIR,
+                template=TEMPLATE,
+                output_dir=OUTPUT_DIR,
             )
 
         rss_feed += generate_day(
-            today=today,
+            prev_day=prev_day,
+            current_day=today,
+            next_day=next_day,
             image=image,
             index=False,
             metadata_file=metadata_file,
-            no_next=no_next,
-            no_prev=no_prev,
-            template=config.TEMPLATE,
-            output_dir=config.OUTPUT_DIR,
+            template=TEMPLATE,
+            output_dir=OUTPUT_DIR,
         )
 
-        if no_prev:
-            # only true on first go around
-            no_prev = False
-
     rss_feed += RSS_FEED_TRAILER
-    rss_file = os.path.join(config.OUTPUT_DIR, "rss.xml")
+    rss_file = os.path.join(OUTPUT_DIR, "rss.xml")
     print(f"Writing {rss_file}")
     with open(rss_file, "w") as rss:
         rss.write(rss_feed)

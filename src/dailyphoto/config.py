@@ -3,13 +3,22 @@ import json
 import os
 from typing import Any
 
-UNUSED_IMAGES = "queued/images"
-UNUSED_METADATA = "queued/metadata"
+UNUSED = "queued"
+UNUSED_IMAGES = os.path.join(UNUSED, "images")
+UNUSED_METADATA = os.path.join(UNUSED, "metadata")
 IMAGES = "current/images"
 METADATA_DIR = "current/metadata"
 OUTPUT_DIR = "generated"
 OUTPUT_IMAGES = "images"
 TEMPLATE = "template.html"
+
+METADATA_TEMPLATE = {
+    "alt": "",
+    "camera": "",
+    "date": "",
+    "film": "",
+    "subtitle": "",
+}
 
 
 @functools.cache
