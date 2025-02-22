@@ -1,8 +1,10 @@
-import datetime
 import json
 import os
 import random
 import shutil
+from datetime import datetime
+from datetime import timedelta
+
 
 from . import config
 
@@ -13,31 +15,60 @@ def new(
     dates: list[str] | None,
     config_file: str,
 ) -> int:
+    # Possible conditions:
+    # dates is none, images is none
+    # add as many images as possible from last to now
+    # dates is not none, images is none
+    # add images for every date specified, bail if there aren't enough
+    # dates is not none, images is not none
+    # add those images for dates specified, bail if they aren't equal
+    # dates is None, images is not none
+    # choose from these images, from last date til today
+
+    # load the last day set in the conf file
+    conf = config.read_config(config_file)
+    if conf is None:
+        return 1
+    all_dates = conf["dates"]
+    if all_dates is None:
+        # if there are no dates in the config, bail, something is wrong
+        return 1
+    sorted(all_dates, key=lambda x: x[0])
+    last_day = datetime.strptime(all_dates[-1][0], "%Y%m%d")
+
+    # get a list of all potential unused images
+    unused_images = [photo for photo in os.listdir(config.UNUSED_IMAGES)]
+
+    # This logic seems complicated BUT
+    max_days = min(
+        [  # Take the longer of dates and images
+            max(
+                [
+                    len(dates) if dates is not None else 0,
+                    len(images) if images is not None else 0,
+                ],
+            )  # or if thats not set, the number of days since the last
+            or (datetime.now() - last_day).days,
+            # but we only have unused_images, so no longer than that
+            len(unused_images),
+        ],
+    )
+
+    if images is None:
+        images = []
+    for image in images:
+        unused_images.remove(image)
+    images += random.sample(unused_images, max_days - len(images))
+
     if dates is None:
         dates = []
+    else:
+        last_day = datetime.strptime(dates[-1], "%Y%m%d")
 
-    # ensure the images array is the same length as dates
-    if images is None:
-        images = [""] * len(dates)
-
-    if dates == []:
-        # Generate some suitable dates starting at the last existing entry
-        conf = config.read_config(config_file)
-        if conf is None:
-            return 1
-        dates = conf["dates"]
-        if dates is None:
-            # if there are no dates in the config, bail, something is wrong
-            return 1
-        sorted(dates, key=lambda x: x[0])
-        last_day = datetime.datetime.strptime(dates[-1][0], "%Y%m%d")
-        # Generate as many dates as we have images or just 1
-        dates = [
-            (last_day + datetime.timedelta(days=(i + 1))).strftime(
-                "%Y%m%d",
-            )
-            for i in range(0, len(images))
-        ]
+    dates += [
+        (last_day + timedelta(days=(i + 1))).strftime("%Y%m%d")
+        for i in range(0, max_days - len(dates))
+    ]
 
     for date, image in zip(dates, images):
         new_image(
@@ -70,10 +101,7 @@ def new_image(
             print(f"Error: {new_image} was already used on {date}")
             return 1
 
-    if new_image == "":
-        new_image = random.choice(os.listdir(config.UNUSED_IMAGES))
-    else:
-        new_image = os.path.basename(new_image)
+    new_image = os.path.basename(new_image)
 
     old_image_path = os.path.join(config.UNUSED_IMAGES, new_image)
     if not os.path.exists(old_image_path):

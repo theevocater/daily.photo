@@ -8,3 +8,4 @@ generated/
 src/dailyphoto.egg-info/
 
 build/
+.DS_Store
