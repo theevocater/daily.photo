@@ -26,15 +26,14 @@ def main(argv: list[str] | None = None) -> int:
         help=f"choose and add new image from {config.UNUSED_IMAGES} for YYYYMMDD",
     )
     sp.add_argument(
-        "date",
+        "--dates",
         nargs="*",
-        help="YYYYMMDD to add new image",
+        help="optional. list of YYYYMMDD to add new images",
     )
     sp.add_argument(
-        "--image",
-        dest="image",
+        "--images",
         nargs="*",
-        help="optional. if passed, use a specific image instead of random",
+        help="optional. list of specific images instead of random",
     )
 
     sp = subparsers.add_parser(
@@ -76,8 +75,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.function == "new":
         return new(
-            images=args.image,
-            dates=args.date,
+            images=args.images,
+            dates=args.dates,
             config_file=args.config_file,
         )
     elif args.function == "validate":
