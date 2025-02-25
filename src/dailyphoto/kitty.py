@@ -1,6 +1,20 @@
 import subprocess
 
 
+def set_layout(layout: str) -> int:
+    """
+    Opens a new split window in kitten to show images in while editing metadata
+    """
+    return subprocess.call(
+        [
+            "kitten",
+            "@",
+            "goto-layout",
+            layout,
+        ],
+    )
+
+
 def new_window() -> str:
     """
     Opens a new split window in kitten to show images in while editing metadata
