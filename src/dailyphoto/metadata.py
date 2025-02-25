@@ -65,7 +65,7 @@ def update(
         if v == "":
             edit = True
 
-    if edit:
+    if edit or always_edit:
         json.dump(
             metadata,
             sys.stdout,
@@ -89,6 +89,7 @@ def metadata(
     fields = set(fields_csv.split(",")) if fields_csv else None
 
     id = kitty.new_window()
+    kitty.set_layout("horizontal")
 
     output_dir = source_dir
     image_dir = os.path.join(output_dir, "images")
