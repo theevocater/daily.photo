@@ -1,15 +1,10 @@
 # daily.photo
 
-Creates https://daily.photo
+Used to create and update https://daily.photo
 
 ## dailyphoto
-To test running it locally,
+I use [uv](https://docs.astral.sh/uv/) to manage the python / dependencies. Try this out with:
 ```
-uv pip install --editable .
-uv run dailyphoto
-# This also works:
-uv run python -m dailyphoto
-```
-
-## TODO
-* combine functionality for adding new images
+uv sync
+uv run dailyphoto --help
+``
