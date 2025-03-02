@@ -1,6 +1,7 @@
 import argparse
 
 from . import config
+from .exif import print_exif
 from .generate import generate
 from .metadata import metadata
 from .new import new
@@ -67,6 +68,17 @@ def main(argv: list[str] | None = None) -> int:
         "source_dir",
         help="Source directory for images",
     )
+
+    sp = subparsers.add_parser(
+        "exif",
+        help="Print EXIF data for a specified JPG file",
+    )
+    sp.add_argument(
+        "images",
+        help="Path to the image(s)",
+        nargs="*",
+    )
+
     args = parser.parse_args(argv)
 
     conf = config.read_config(args.config_file)
@@ -92,5 +104,7 @@ def main(argv: list[str] | None = None) -> int:
             conf=conf,
             source_dir=args.source_dir,
         )
+    elif args.function == "exif":
+        return print_exif(args.images)
     else:
         return generate(conf=conf)

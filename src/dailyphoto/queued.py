@@ -3,7 +3,8 @@ import os
 import shutil
 from typing import Any
 
-from .config import METADATA_TEMPLATE
+from dailyphoto.metadata import create_empty_metadata
+
 from .config import UNUSED
 from .config import UNUSED_IMAGES
 from .config import UNUSED_METADATA
@@ -38,14 +39,7 @@ def move(
     json_name = os.path.join(UNUSED_METADATA, prefix + os.path.extsep + "json")
     print(f"Creating {json_name}")
     try:
-        with open(json_name, "w") as f:
-            json.dump(
-                METADATA_TEMPLATE,
-                f,
-                sort_keys=True,
-                indent=2,
-            )
-            f.write(os.linesep)
+        create_empty_metadata(os.path.join(UNUSED_IMAGES, name), json_name)
     except (
         FileNotFoundError,
         json.decoder.JSONDecodeError,
