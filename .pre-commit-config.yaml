@@ -39,6 +39,6 @@ repos:
       - id: validate
         name: validate config
         language: system
-        entry: python3 -m src.dailyphoto validate
+        entry: uv run dailyphoto validate
         files: .json|.jpg
         pass_filenames: false
