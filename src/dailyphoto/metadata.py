@@ -5,6 +5,7 @@ import sys
 
 from . import kitty
 from .config import METADATA_TEMPLATE
+from .exif import exif_to_metadata
 
 
 def edit_json(json_name: str, image_name: str, window_id: str) -> int:
@@ -18,10 +19,12 @@ def edit_json(json_name: str, image_name: str, window_id: str) -> int:
     return subprocess.call(["nvim", json_name])
 
 
-def create_empty_metadata(json_name: str) -> bool:
+def create_empty_metadata(image_name: str, json_name: str) -> bool:
+    metadata = METADATA_TEMPLATE.copy()
+    exif_to_metadata(image_name, metadata)
     with open(json_name, "w") as f:
         json.dump(
-            METADATA_TEMPLATE,
+            metadata,
             f,
             sort_keys=True,
             indent=2,
@@ -39,7 +42,7 @@ def update(
 ) -> int:
     if not os.path.exists(json_name):
         print("Creating missing {json_name}")
-        create_empty_metadata(json_name)
+        create_empty_metadata(image_name, json_name)
     try:
         with open(json_name) as f:
             metadata = json.load(f)
