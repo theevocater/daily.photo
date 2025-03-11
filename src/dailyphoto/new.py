@@ -57,7 +57,8 @@ def new(
         images = []
     for image in images:
         unused_images.remove(image)
-    images += random.sample(unused_images, max_days - len(images))
+    if max_days - len(images) > 0:
+        images += random.sample(unused_images, max_days - len(images))
 
     if dates is None:
         dates = []
