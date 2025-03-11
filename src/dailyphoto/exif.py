@@ -30,7 +30,7 @@ def exif_to_metadata(image_file: str, metadata: dict[str, str]) -> None:
     exif_tags: dict[str, str | None] = {
         "Make": None,
         "Model": None,
-        "DateTimeOriginal": None,
+        "DateTime": None,
     }
 
     with Image.open(image_file) as image:
