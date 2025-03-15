@@ -19,18 +19,18 @@ def edit_json(json_name: str, image_name: str, window_id: str) -> int:
     return subprocess.call(["nvim", json_name])
 
 
-def create_empty_metadata(image_name: str, json_name: str) -> bool:
-    metadata = METADATA_TEMPLATE.copy()
-    exif_to_metadata(image_name, metadata)
-    with open(json_name, "w") as f:
-        json.dump(
-            metadata,
-            f,
-            sort_keys=True,
-            indent=2,
-        )
-        f.write(os.linesep)
-    return True
+def write_metadata(metadata: dict[str, str], json_name: str) -> None:
+    try:
+        with open(json_name, "w") as f:
+            json.dump(
+                metadata,
+                f,
+                sort_keys=True,
+                indent=2,
+            )
+            f.write(os.linesep)
+    except OSError as e:
+        print(f"Error writing to file {json_name}: {e}")
 
 
 def update(
@@ -42,16 +42,22 @@ def update(
 ) -> int:
     if not os.path.exists(json_name):
         print("Creating missing {json_name}")
-        create_empty_metadata(image_name, json_name)
-    try:
-        with open(json_name) as f:
-            metadata = json.load(f)
-    except FileNotFoundError as e:
-        print(f"Unable to load metadata file: {json_name}.", e)
-        return 1
-    except json.decoder.JSONDecodeError as e:
-        print(f"Unable to parse metadata file: {json_name}.", e)
-        return edit_json(json_name, image_name, window_id)
+        metadata = METADATA_TEMPLATE.copy()
+    else:
+        try:
+            with open(json_name) as f:
+                metadata = json.load(f)
+        except FileNotFoundError as e:
+            print(f"Unable to load metadata file: {json_name}.", e)
+            return 1
+        except json.decoder.JSONDecodeError as e:
+            # if the json is garbage, give it to me to edit it
+            print(f"Unable to parse metadata file: {json_name}.", e)
+            return edit_json(json_name, image_name, window_id)
+
+    # create or fix the metadata dict with data from the image
+    exif_to_metadata(image_name, metadata)
+    write_metadata(metadata, json_name)
 
     edit = always_edit
     if fields is None:
