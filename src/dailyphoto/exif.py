@@ -27,21 +27,29 @@ def print_exif(image_files: list[str]) -> int:
 
 
 def exif_to_metadata(image_file: str, metadata: dict[str, str]) -> None:
-    exif_tags: dict[str, str | None] = {
-        "Make": None,
-        "Model": None,
-        "DateTime": None,
-    }
-
     with Image.open(image_file) as image:
         exif_data = image.getexif()
-        if exif_data is not None:
-            for tag in exif_tags.keys():
-                exif_tags[tag] = exif_data.get(Base[tag])
-    if exif_tags["Make"] and exif_tags["Model"] and metadata["camera"] == "":
-        metadata["camera"] = f"{exif_tags['Make']} {exif_tags['Model']}"
-    if exif_tags["DateTime"] and metadata["date"] == "":
-        metadata["date"] = datetime.strftime(
-            datetime.strptime(exif_tags["DateTime"], "%Y:%m:%d %H:%M:%S"),
-            "%Y%m%d",
+    if exif_data is None:
+        return
+    make = exif_data.get(Base["Make"])
+    model = exif_data.get(Base["Model"])
+    ifd_tags = exif_data.get_ifd(Image.ExifTags.IFD.Exif)
+    dto = ifd_tags.get(Base["DateTimeOriginal"])
+    exif_date = None
+    if dto:
+        exif_date = (
+            datetime.strftime(
+                datetime.strptime(dto, "%Y:%m:%d %H:%M:%S"),
+                "%Y%m%d",
+            )
+            or None
         )
+
+    if make and model and metadata["camera"] == "":
+        metadata["camera"] = f"{make} {model}"
+    # Always trust the camera for digital cameras
+    if exif_date and make == "FUJIFILM":
+        metadata["date"] = exif_date
+    # seed the date if we don't have one at all
+    elif exif_date and metadata["date"] == "":
+        metadata["date"] = exif_date

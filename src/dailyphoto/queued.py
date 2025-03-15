@@ -1,9 +1,6 @@
-import json
 import os
 import shutil
 from typing import Any
-
-from dailyphoto.metadata import create_empty_metadata
 
 from .config import UNUSED
 from .config import UNUSED_IMAGES
@@ -25,7 +22,7 @@ def move(
     source_dir: str,
     name: str,
 ) -> int:
-    prefix, ext = os.path.splitext(name)
+    _, ext = os.path.splitext(name)
     if ext != ".jpg":
         return 0
     print(
@@ -35,20 +32,6 @@ def move(
         os.path.join(source_dir, name),
         os.path.join(UNUSED_IMAGES, name),
     )
-
-    json_name = os.path.join(UNUSED_METADATA, prefix + os.path.extsep + "json")
-    print(f"Creating {json_name}")
-    try:
-        create_empty_metadata(os.path.join(UNUSED_IMAGES, name), json_name)
-    except (
-        FileNotFoundError,
-        json.decoder.JSONDecodeError,
-    ) as e:
-        print(
-            f"Unable to write metadata: {json_name}.",
-            e,
-        )
-        return 1
 
     return 0
 
