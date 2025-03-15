@@ -32,9 +32,7 @@ def exif_to_metadata(image_file: str, metadata: dict[str, str]) -> None:
     if exif_data is None:
         return
     make = exif_data.get(Base["Make"])
-    print(f"make: {make}")
     model = exif_data.get(Base["Model"])
-    print(f"model: {model}")
     ifd_tags = exif_data.get_ifd(Image.ExifTags.IFD.Exif)
     dto = ifd_tags.get(Base["DateTimeOriginal"])
     exif_date = None
@@ -46,7 +44,6 @@ def exif_to_metadata(image_file: str, metadata: dict[str, str]) -> None:
             )
             or None
         )
-    print(f"DateTimeOriginal: {dto}")
 
     if make and model and metadata["camera"] == "":
         metadata["camera"] = f"{make} {model}"
