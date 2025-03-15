@@ -56,7 +56,8 @@ def new(
     if images is None:
         images = []
     for image in images:
-        unused_images.remove(image)
+        if image in unused_images:
+            unused_images.remove(image)
     if max_days - len(images) > 0:
         images += random.sample(unused_images, max_days - len(images))
 
@@ -101,6 +102,7 @@ def new_image(
             print(f"Error: {new_image} was already used on {date}")
             return 1
 
+    # Move the image
     new_image = os.path.basename(new_image)
 
     old_image_path = os.path.join(config.UNUSED_IMAGES, new_image)
@@ -108,24 +110,23 @@ def new_image(
         print(f"Error: {old_image_path} does not exist")
         return 1
     new_image_path = os.path.join(config.IMAGES, new_image)
+    print(f"Moving {old_image_path} to {new_image_path}")
+    shutil.move(old_image_path, new_image_path)
 
+    # Try to move the metadata file
     old_metadata_file = config.get_metadata_filename(
         config.UNUSED_METADATA,
         new_image,
     )
-    if not os.path.exists(old_metadata_file):
-        print(f"Error: {old_metadata_file} does not exist")
-        return 1
-    new_metadata_file = config.get_metadata_filename(
-        config.METADATA_DIR,
-        new_image,
-    )
-
-    print(f"Moving {old_image_path} to {new_image_path}")
-    shutil.move(old_image_path, new_image_path)
-
-    print(f"Moving {old_metadata_file} to {new_metadata_file}")
-    shutil.move(old_metadata_file, new_metadata_file)
+    if os.path.exists(old_metadata_file):
+        new_metadata_file = config.get_metadata_filename(
+            config.METADATA_DIR,
+            new_image,
+        )
+        print(f"Moving {old_metadata_file} to {new_metadata_file}")
+        shutil.move(old_metadata_file, new_metadata_file)
+    else:
+        print(f"{old_metadata_file} does not exist, no need to move")
 
     conf["dates"].append([new_date, new_image])
     print(f"Writing {config_file}")
