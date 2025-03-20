@@ -5,7 +5,7 @@ generated/
 *.pyc
 .venv/
 .mypy_cache/
-src/dailyphoto.egg-info/
+src/*.egg-info/
 
 build/
 .DS_Store
