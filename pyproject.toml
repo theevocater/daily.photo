@@ -11,3 +11,9 @@ dailyphoto = "dailyphoto:cli.main"
 
 [tool.uv]
 package = true
+
+[dependency-groups]
+dev = [
+    "mypy>=1.17.0",
+    "pytest>=8.4.1",
+]

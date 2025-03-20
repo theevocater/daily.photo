@@ -1,4 +1,3 @@
-import json
 import os
 import random
 import shutil
@@ -28,12 +27,12 @@ def new(
     conf = config.read_config(config_file)
     if conf is None:
         return 1
-    all_dates = conf["dates"]
+    all_dates = conf.dates
     if all_dates is None:
         # if there are no dates in the config, bail, something is wrong
         return 1
-    sorted(all_dates, key=lambda x: x[0])
-    last_day = datetime.strptime(all_dates[-1][0], "%Y%m%d")
+    sorted(all_dates, key=lambda x: x.day)
+    last_day = datetime.strptime(all_dates[-1].day, "%Y%m%d")
 
     # get a list of all potential unused images
     unused_images = [photo for photo in os.listdir(config.UNUSED_IMAGES)]
@@ -94,12 +93,12 @@ def new_image(
         return 1
 
     # Detect if a date or image has been used before
-    for date, image in conf["dates"]:
-        if date == new_date:
+    for date in conf.dates:
+        if date.day == new_date:
             print(f"Error: already have an image for {new_date}")
             return 1
-        if new_image and image == new_image:
-            print(f"Error: {new_image} was already used on {date}")
+        if new_image and date.filename == new_image:
+            print(f"Error: {new_image} was already used on {date.day}")
             return 1
 
     # Move the image
@@ -128,12 +127,9 @@ def new_image(
     else:
         print(f"{old_metadata_file} does not exist, no need to move")
 
-    conf["dates"].append([new_date, new_image])
+    conf.dates.append(config.Date(day=new_date, filename=new_image))
     print(f"Writing {config_file}")
-    with open(config_file, "w") as c:
-        json.dump(conf, c, sort_keys=True, indent=2)
-        # json module doesn't write a trailing newline by default
-        c.write(os.linesep)
+    config.write_config(config_file, conf)
 
     print(f"Added {new_date}: {new_image}")
     return 0
