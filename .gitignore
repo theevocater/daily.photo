@@ -9,3 +9,4 @@ src/*.egg-info/
 
 build/
 .DS_Store
+dailyphoto.tar.gz

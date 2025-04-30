@@ -3,6 +3,7 @@ import json
 import os
 import string
 import sys
+import tarfile
 from typing import Any
 from typing import TypedDict
 
@@ -178,6 +179,29 @@ def setup_output_dir(output_dir: str) -> bool:
     return True
 
 
+def create_tar_gz_with_symlinks(source_dir: str, output_filename: str) -> None:
+    """
+    Creates a tar.gz archive of the given directory.
+    Resolve symlinks to their target.
+    """
+    with tarfile.open(output_filename, "w:gz") as tar:
+        for root, _, files in os.walk(source_dir):
+            for name in files:
+                full_path = os.path.join(root, name)
+                # Resolve symlinks to their targets
+                if os.path.islink(full_path):
+                    target_path = os.path.realpath(full_path, strict=True)
+                    tar.add(
+                        target_path,
+                        arcname=os.path.relpath(full_path, start=source_dir),
+                    )
+                else:
+                    tar.add(
+                        full_path,
+                        arcname=os.path.relpath(full_path, start=source_dir),
+                    )
+
+
 def generate(
     *,
     conf: dict[str, Any],
@@ -239,4 +263,5 @@ def generate(
     with open(rss_file, "w") as rss:
         rss.write(rss_feed)
 
+    create_tar_gz_with_symlinks(OUTPUT_DIR, "dailyphoto.tar.gz")
     return 0
