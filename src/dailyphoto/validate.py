@@ -3,6 +3,7 @@ import json
 import os
 from typing import Any
 
+from .config import Config
 from .config import get_metadata_filename
 from .config import IMAGES
 from .config import METADATA_DIR
@@ -25,8 +26,8 @@ def valid_date(value: Any) -> bool:
     return True
 
 
-def validate(*, conf: dict[str, Any]) -> int:
-    dates = conf.get("dates", None)
+def validate(*, conf: Config) -> int:
+    dates = conf.dates
 
     if dates is None or len(dates) == 0:
         print("No dates set in config")
@@ -42,16 +43,12 @@ def validate(*, conf: dict[str, Any]) -> int:
 
     ret = 0
     for date in dates:
-        if len(date) != 2:
-            print(f"Entry {date} has the wrong number of fields")
-            ret += 1
-
-        day = date[0]
+        day = date.day
         if not valid_date(day):
             print(f"Entry {date} unable to parse date {day}")
             ret += 1
 
-        image = date[1]
+        image = date.filename
 
         if not os.path.exists(os.path.join(IMAGES, image)):
             print(f"Entry {date}: {image} missing jpg")

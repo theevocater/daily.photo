@@ -4,9 +4,9 @@ import os
 import string
 import sys
 import tarfile
-from typing import Any
 from typing import TypedDict
 
+from .config import Config
 from .config import get_metadata_filename
 from .config import IMAGES
 from .config import METADATA_DIR
@@ -46,6 +46,10 @@ def format_filename(output_dir: str, day: datetime.datetime) -> str:
     return os.path.join(output_dir, f"{day.strftime('%Y%m%d')}.html")
 
 
+def to_datetime(date_str: str) -> datetime.datetime:
+    return datetime.datetime.strptime(date_str, "%Y%m%d")
+
+
 class TemplateSubstitutions(TypedDict):
     yesterday: str
     tomorrow: str
@@ -76,7 +80,7 @@ def generate_html(
 def photo_date(date: str) -> str:
     if not date:
         return ""
-    return datetime.datetime.strptime(date, "%Y%m%d").strftime("%B %d, %Y")
+    return to_datetime(date).strftime("%B %d, %Y")
 
 
 def rss_date(date: datetime.datetime) -> str:
@@ -86,8 +90,13 @@ def rss_date(date: datetime.datetime) -> str:
     return date.isoformat() + "Z"
 
 
+def is_final_day(conf: Config, day: datetime.datetime) -> bool:
+    return day == to_datetime(conf.dates[-1].day)
+
+
 def generate_day(
     *,
+    conf: Config,
     prev_day: datetime.datetime,
     current_day: datetime.datetime,
     next_day: datetime.datetime,
@@ -124,11 +133,15 @@ def generate_day(
             os.remove(output_image)
         os.symlink(intput_image, output_image)
 
+    tomorrow = format_filename("/", next_day)
+    if is_final_day(conf, next_day):
+        tomorrow = "index.html"
+
     generate_html(
         template,
         {
             "yesterday": format_filename("/", prev_day),
-            "tomorrow": format_filename("/", next_day),
+            "tomorrow": tomorrow,
             "image": os.path.join(OUTPUT_IMAGES, image),
             "alt": metadata["alt"],
             "subtitle": metadata["subtitle"],
@@ -166,11 +179,6 @@ def setup_output_dir(output_dir: str) -> bool:
         print(f"Creating {images}")
         os.mkdir(images)
 
-    cname = f"{output_dir}/CNAME"
-    if not os.path.exists(cname):
-        print(f"Creating {cname}")
-        os.symlink("../CNAME", cname)
-
     main_css = f"{output_dir}/main.css"
     if not os.path.exists(main_css):
         print(f"Creating {main_css}")
@@ -202,10 +210,7 @@ def create_tar_gz_with_symlinks(source_dir: str, output_filename: str) -> None:
                     )
 
 
-def generate(
-    *,
-    conf: dict[str, Any],
-) -> int:
+def generate(*, conf: Config) -> int:
     print("Generating site")
     if not setup_output_dir(OUTPUT_DIR):
         return 1
@@ -214,32 +219,33 @@ def generate(
         date=rss_date(datetime.datetime.now()),
     )
 
-    dates = conf["dates"]
-    for i, (date, image) in enumerate(dates):
-        today = datetime.datetime.strptime(date, "%Y%m%d")
+    dates = conf.dates
+    for i, date in enumerate(dates):
+        today = to_datetime(date.day)
         metadata_file = get_metadata_filename(
             METADATA_DIR,
-            image,
+            date.filename,
         )
 
         # Determine previous, current, and next days
         if i == 0:
             prev_day = today
         else:
-            prev_day = datetime.datetime.strptime(dates[i - 1][0], "%Y%m%d")
+            prev_day = to_datetime(dates[i - 1].day)
 
         if i == len(dates) - 1:
             next_day = today
         else:
-            next_day = datetime.datetime.strptime(dates[i + 1][0], "%Y%m%d")
+            next_day = to_datetime(dates[i + 1].day)
 
         if i == len(dates) - 1:
             # Last day we need to generate the index and no anchor
             generate_day(
+                conf=conf,
                 prev_day=prev_day,
                 current_day=today,
                 next_day=next_day,
-                image=image,
+                image=date.filename,
                 index=True,
                 metadata_file=metadata_file,
                 template=TEMPLATE,
@@ -247,10 +253,11 @@ def generate(
             )
 
         rss_feed += generate_day(
+            conf=conf,
             prev_day=prev_day,
             current_day=today,
             next_day=next_day,
-            image=image,
+            image=date.filename,
             index=False,
             metadata_file=metadata_file,
             template=TEMPLATE,
