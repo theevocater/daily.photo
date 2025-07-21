@@ -42,9 +42,12 @@ class Config:
         )
 
     def to_json(self):
-        return json.dumps(
-            {"dates": [[d.day, d.filename] for d in self.dates]},
-            indent=2,
+        return (
+            json.dumps(
+                {"dates": [[d.day, d.filename] for d in self.dates]},
+                indent=2,
+            )
+            + "\n"
         )
 
 
