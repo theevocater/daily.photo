@@ -32,7 +32,7 @@ def new(
         # if there are no dates in the config, bail, something is wrong
         return 1
     sorted(all_dates, key=lambda x: x.day)
-    last_day = datetime.strptime(all_dates[-1].day, "%Y%m%d")
+    last_day = all_dates[-1].day
 
     # get a list of all potential unused images
     unused_images = [photo for photo in os.listdir(config.UNUSED_IMAGES)]
@@ -127,7 +127,9 @@ def new_image(
     else:
         print(f"{old_metadata_file} does not exist, no need to move")
 
-    conf.dates.append(config.Date(day=new_date, filename=new_image))
+    conf.dates.append(
+        config.Date.model_validate({"day": new_date, "filename": new_image}),
+    )
     print(f"Writing {config_file}")
     config.write_config(config_file, conf)
 

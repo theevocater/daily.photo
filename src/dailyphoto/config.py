@@ -1,8 +1,12 @@
 import functools
 import json
 import os
-from dataclasses import dataclass
-from typing import Any
+from datetime import datetime
+from typing import Annotated
+
+from pydantic import BaseModel
+from pydantic import BeforeValidator
+from pydantic import PlainSerializer
 
 UNUSED = "queued"
 UNUSED_IMAGES = os.path.join(UNUSED, "images")
@@ -22,33 +26,17 @@ METADATA_TEMPLATE = {
 }
 
 
-@dataclass
-class Date:
-    day: str
+class Date(BaseModel):
+    day: Annotated[
+        datetime,
+        BeforeValidator(lambda ds: datetime.strptime(ds, "%Y%m%d")),
+        PlainSerializer(lambda dt: dt.strftime("%Y%m%d")),
+    ]
     filename: str
 
-    def to_json(self):
-        return json.dumps([self.day, self.filename])
 
-
-@dataclass
-class Config:
+class Config(BaseModel):
     dates: list[Date]
-
-    @classmethod
-    def from_json(cls, js: Any) -> "Config":
-        return Config(
-            dates=[Date(day=date[0], filename=date[1]) for date in js["dates"]],
-        )
-
-    def to_json(self):
-        return (
-            json.dumps(
-                {"dates": [[d.day, d.filename] for d in self.dates]},
-                indent=2,
-            )
-            + "\n"
-        )
 
 
 @functools.cache
@@ -56,7 +44,7 @@ def read_config(config_file: str) -> Config | None:
     try:
         with open(config_file) as c:
             parsed = json.load(c)
-            return Config.from_json(parsed)
+            return Config.model_validate(parsed)
 
     except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
         print(f"Unable to load config_file: {config_file}.", e)
@@ -66,7 +54,9 @@ def read_config(config_file: str) -> Config | None:
 def write_config(config_file: str, config: Config) -> None:
     try:
         with open(config_file, "w") as c:
-            c.write(config.to_json())
+            c.write(config.model_dump_json(indent=2))
+            # include a final line ending
+            c.write("\n")
 
     except OSError as e:
         print(f"Unable to write config_file: {config_file}.", e)

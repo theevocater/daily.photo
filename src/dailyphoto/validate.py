@@ -1,6 +1,6 @@
-import datetime
 import json
 import os
+from datetime import datetime
 from typing import Any
 
 from .config import Config
@@ -20,7 +20,7 @@ def valid_date(value: Any) -> bool:
     if len(day) != 8:
         return False
     try:
-        datetime.datetime.strptime(day, "%Y%m%d")
+        datetime.strptime(day, "%Y%m%d")
     except ValueError:
         return False
     return True
@@ -43,18 +43,11 @@ def validate(*, conf: Config) -> int:
 
     ret = 0
     for date in dates:
-        day = date.day
-        if not valid_date(day):
-            print(f"Entry {date} unable to parse date {day}")
+        if not os.path.exists(os.path.join(IMAGES, date.filename)):
+            print(f"Entry {date}: {date.filename} missing jpg")
             ret += 1
 
-        image = date.filename
-
-        if not os.path.exists(os.path.join(IMAGES, image)):
-            print(f"Entry {date}: {image} missing jpg")
-            ret += 1
-
-        metadata_file = get_metadata_filename(METADATA_DIR, image)
+        metadata_file = get_metadata_filename(METADATA_DIR, date.filename)
         try:
             with open(metadata_file) as md:
                 metadata = json.load(md)
