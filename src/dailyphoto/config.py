@@ -25,13 +25,52 @@ METADATA_TEMPLATE = {
     "subtitle": "",
 }
 
+ShortDatetime = Annotated[
+    datetime,
+    BeforeValidator(lambda ds: datetime.strptime(ds, "%Y%m%d")),
+    PlainSerializer(lambda dt: dt.strftime("%Y%m%d")),
+]
+
+
+class Metadata(BaseModel):
+    alt: str
+    camera: str
+    date: ShortDatetime | str
+    film: str
+    subtitle: str
+
+
+def get_metadata_filename(metadata_dir: str, image: str) -> str:
+    return os.path.join(
+        metadata_dir,
+        os.path.splitext(os.path.basename(image))[0] + ".json",
+    )
+
+
+def read_metadata(metadata_file: str) -> Metadata | None:
+    try:
+        with open(metadata_file) as c:
+            parsed = json.load(c)
+            return Metadata.model_validate(parsed)
+
+    except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
+        print(f"Unable to load metadata: {metadata_file}.", e)
+        return None
+
+
+def write_metadata(metadata_file: str, metadata: Metadata) -> None:
+    try:
+        with open(metadata_file, "w") as c:
+            c.write(metadata.model_dump_json(indent=2))
+            # include a final line ending
+            c.write("\n")
+
+    except OSError as e:
+        print(f"Unable to write metadata: {metadata_file}.", e)
+
 
 class Date(BaseModel):
-    day: Annotated[
-        datetime,
-        BeforeValidator(lambda ds: datetime.strptime(ds, "%Y%m%d")),
-        PlainSerializer(lambda dt: dt.strftime("%Y%m%d")),
-    ]
+    day: ShortDatetime
     filename: str
 
 
@@ -60,10 +99,3 @@ def write_config(config_file: str, config: Config) -> None:
 
     except OSError as e:
         print(f"Unable to write config_file: {config_file}.", e)
-
-
-def get_metadata_filename(metadata_dir: str, image: str) -> str:
-    return os.path.join(
-        metadata_dir,
-        os.path.splitext(os.path.basename(image))[0] + ".json",
-    )

@@ -1,4 +1,3 @@
-import json
 import os
 from datetime import datetime
 from typing import Any
@@ -7,6 +6,7 @@ from .config import Config
 from .config import get_metadata_filename
 from .config import IMAGES
 from .config import METADATA_DIR
+from .config import read_metadata
 
 
 def valid_str(value: Any) -> bool:
@@ -33,14 +33,6 @@ def validate(*, conf: Config) -> int:
         print("No dates set in config")
         return 1
 
-    metadata_keys = {
-        "alt": valid_str,
-        "camera": valid_str,
-        "date": valid_date,
-        "film": valid_str,
-        "subtitle": valid_str,
-    }
-
     ret = 0
     config_files = set()
     for date in dates:
@@ -55,29 +47,19 @@ def validate(*, conf: Config) -> int:
             ret += 1
 
         metadata_file = get_metadata_filename(METADATA_DIR, date.filename)
-        try:
-            with open(metadata_file) as md:
-                metadata = json.load(md)
-        except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
+        metadata = read_metadata(metadata_file)
+        if metadata is None:
             ret += 1
-            print(f"Entry {date} unable to load {metadata_file}: ", e)
+            print(f"Entry {date} unable to load {metadata_file}")
             continue
 
-        for key, validator in metadata_keys.items():
-            if key not in metadata:
-                print(f'{metadata_file} missing key "{key}"')
-                ret += 1
-                continue
-
-            if not validator(metadata[key]):
-                print(
-                    f"{metadata_file} unable to validate: {key} -> {metadata[key]}",
-                )
-                ret += 1
-            del metadata[key]
-
-        if len(metadata) > 0:
-            print(f"{metadata_file} has extra keys {metadata.keys()}")
+        # Validate field values.
+        valid_str(metadata.alt)
+        valid_str(metadata.camera)
+        valid_str(metadata.film)
+        valid_str(metadata.subtitle)
+        if isinstance(metadata.date, str):
+            print(f"{metadata_file} has invalid date {metadata.date}")
             ret += 1
 
     disk_files = set()
