@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 from typing import Any
 
 from .config import Config
@@ -11,19 +10,6 @@ from .config import read_metadata
 
 def valid_str(value: Any) -> bool:
     return isinstance(value, str) and len(value) > 0
-
-
-def valid_date(value: Any) -> bool:
-    if not isinstance(value, str):
-        return False
-    day = value
-    if len(day) != 8:
-        return False
-    try:
-        datetime.strptime(day, "%Y%m%d")
-    except ValueError:
-        return False
-    return True
 
 
 def validate(*, conf: Config) -> int:

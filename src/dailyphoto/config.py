@@ -33,11 +33,11 @@ ShortDatetime = Annotated[
 
 
 class Metadata(BaseModel):
-    alt: str
-    camera: str
-    date: ShortDatetime | str
-    film: str
-    subtitle: str
+    alt: str = ""
+    camera: str = ""
+    date: ShortDatetime | str = ""
+    film: str = ""
+    subtitle: str = ""
 
 
 def get_metadata_filename(metadata_dir: str, image: str) -> str:
