@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from dailyphoto.config import Metadata
 from PIL import Image
 from PIL.ExifTags import Base
 from PIL.ExifTags import TAGS
@@ -26,7 +27,7 @@ def print_exif(image_files: list[str]) -> int:
     return 0
 
 
-def exif_to_metadata(image_file: str, metadata: dict[str, str]) -> None:
+def exif_to_metadata(image_file: str, metadata: Metadata) -> None:
     with Image.open(image_file) as image:
         exif_data = image.getexif()
     if exif_data is None:
@@ -45,11 +46,11 @@ def exif_to_metadata(image_file: str, metadata: dict[str, str]) -> None:
             or None
         )
 
-    if make and model and metadata["camera"] == "":
-        metadata["camera"] = f"{make} {model}"
+    if make and model and metadata.camera == "":
+        metadata.camera = f"{make} {model}"
     # Always trust the camera for digital cameras
     if exif_date and make == "FUJIFILM":
-        metadata["date"] = exif_date
+        metadata.date = exif_date
     # seed the date if we don't have one at all
-    elif exif_date and metadata["date"] == "":
-        metadata["date"] = exif_date
+    elif exif_date and metadata.date == "":
+        metadata.date = exif_date

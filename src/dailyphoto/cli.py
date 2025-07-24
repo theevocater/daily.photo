@@ -52,11 +52,6 @@ def main(argv: list[str] | None = None) -> int:
         default=False,
     )
     sp.add_argument(
-        "--fields",
-        help="Comma separate list of fields to check if a file needs editing.",
-        default=None,
-    )
-    sp.add_argument(
         "source_dir",
         help="Source directory for images",
     )
@@ -96,7 +91,6 @@ def main(argv: list[str] | None = None) -> int:
     elif args.function == "metadata":
         return metadata(
             always_edit=args.always_edit,
-            fields_csv=args.fields,
             source_dir=args.source_dir,
         )
     elif args.function == "queue":

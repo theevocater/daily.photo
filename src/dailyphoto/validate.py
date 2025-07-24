@@ -39,6 +39,9 @@ def validate(*, conf: Config) -> int:
             print(f"Entry {date} unable to load {metadata_file}")
             continue
 
+        # TODO extra should we allow them? how to ahndle
+        metadata.model_extra
+
         # Validate field values.
         valid_str(metadata.alt)
         valid_str(metadata.camera)

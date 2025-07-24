@@ -6,6 +6,7 @@ from typing import Annotated
 
 from pydantic import BaseModel
 from pydantic import BeforeValidator
+from pydantic import ConfigDict
 from pydantic import PlainSerializer
 
 UNUSED = "queued"
@@ -33,6 +34,7 @@ ShortDatetime = Annotated[
 
 
 class Metadata(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     alt: str = ""
     camera: str = ""
     date: ShortDatetime | str = ""
@@ -52,8 +54,7 @@ def read_metadata(metadata_file: str) -> Metadata | None:
         with open(metadata_file) as c:
             parsed = json.load(c)
             return Metadata.model_validate(parsed)
-
-    except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
+    except FileNotFoundError as e:
         print(f"Unable to load metadata: {metadata_file}.", e)
         return None
 
@@ -64,7 +65,6 @@ def write_metadata(metadata_file: str, metadata: Metadata) -> None:
             c.write(metadata.model_dump_json(indent=2))
             # include a final line ending
             c.write("\n")
-
     except OSError as e:
         print(f"Unable to write metadata: {metadata_file}.", e)
 
