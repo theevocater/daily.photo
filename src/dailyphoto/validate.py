@@ -42,7 +42,14 @@ def validate(*, conf: Config) -> int:
     }
 
     ret = 0
+    config_files = set()
     for date in dates:
+        # Check for dupes in the filenames
+        if date.filename in config_files:
+            print(f"Entry {date}: {date.filename} is duplicate")
+            ret += 1
+        config_files.add(date.filename)
+
         if not os.path.exists(os.path.join(IMAGES, date.filename)):
             print(f"Entry {date}: {date.filename} missing jpg")
             ret += 1
@@ -72,5 +79,30 @@ def validate(*, conf: Config) -> int:
         if len(metadata) > 0:
             print(f"{metadata_file} has extra keys {metadata.keys()}")
             ret += 1
+
+    disk_files = set()
+    for root, dirs, files in os.walk(IMAGES):
+        if root != IMAGES:
+            print(f"{IMAGES} contains unknown dir {root}")
+            ret += 1
+
+        if len(dirs) != 0:
+            print(f"extra dirs detected see {dirs}")
+            ret += 1
+
+        for file in files:
+            disk_files.add(file)
+
+    diff = config_files.difference(disk_files)
+    if len(diff) != 0:
+        print(
+            f"Missing images in config_files {diff}",
+        )
+
+    diff = disk_files.difference(config_files)
+    if len(diff) != 0:
+        print(
+            f"Unexpected files on disk: {diff}",
+        )
 
     return ret
