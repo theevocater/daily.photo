@@ -91,7 +91,7 @@ def rss_date(date: datetime.datetime) -> str:
 
 
 def is_final_day(conf: Config, day: datetime.datetime) -> bool:
-    return day == to_datetime(conf.dates[-1].day)
+    return day == conf.dates[-1].day
 
 
 def generate_day(
@@ -221,7 +221,7 @@ def generate(*, conf: Config) -> int:
 
     dates = conf.dates
     for i, date in enumerate(dates):
-        today = to_datetime(date.day)
+        today = date.day
         metadata_file = get_metadata_filename(
             METADATA_DIR,
             date.filename,
@@ -231,12 +231,12 @@ def generate(*, conf: Config) -> int:
         if i == 0:
             prev_day = today
         else:
-            prev_day = to_datetime(dates[i - 1].day)
+            prev_day = dates[i - 1].day
 
         if i == len(dates) - 1:
             next_day = today
         else:
-            next_day = to_datetime(dates[i + 1].day)
+            next_day = dates[i + 1].day
 
         if i == len(dates) - 1:
             # Last day we need to generate the index and no anchor
