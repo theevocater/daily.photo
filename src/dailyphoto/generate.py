@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import shutil
 import string
 import sys
 import tarfile
@@ -170,9 +171,12 @@ def setup_output_dir(output_dir: str) -> bool:
     """
     Creates the output dir and links base files like CSS
     """
-    if not os.path.exists(output_dir):
-        print(f"Creating {output_dir}")
-        os.mkdir(output_dir)
+    # clear out previous dir if it exists
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
+
+    print(f"Creating {output_dir}")
+    os.mkdir(output_dir)
 
     images = os.path.join(output_dir, OUTPUT_IMAGES)
     if not os.path.exists(images):
@@ -192,6 +196,10 @@ def create_tar_gz_with_symlinks(source_dir: str, output_filename: str) -> None:
     Creates a tar.gz archive of the given directory.
     Resolve symlinks to their target.
     """
+    # remove old tar file
+    if os.path.exists(output_filename):
+        os.remove(output_filename)
+
     with tarfile.open(output_filename, "w:gz") as tar:
         for root, _, files in os.walk(source_dir):
             for name in files:
