@@ -90,6 +90,7 @@ def main(argv: list[str] | None = None) -> int:
         return validate(conf=conf)
     elif args.function == "metadata":
         return metadata(
+            conf=conf,
             always_edit=args.always_edit,
             source_dir=args.source_dir,
         )

@@ -3,9 +3,11 @@ import os
 import subprocess
 import sys
 
+from dailyphoto.validate import validate_metadata
 from pydantic import ValidationError
 
 from . import kitty
+from .config import Config
 from .config import Metadata
 from .config import read_metadata
 from .config import write_metadata
@@ -40,16 +42,7 @@ def update(
     exif_to_metadata(image_name, metadata)
     write_metadata(json_name, metadata)
 
-    # TODO extra
-    metadata.model_extra
-    edit = always_edit
-    # TODO doesn't work -- converts date to str
-    for k, v in metadata.model_dump().items():
-        if k == "date" and isinstance(v, str):
-            edit = True
-
-        if v == "":
-            edit = True
+    edit = always_edit or not validate_metadata(json_name, metadata)
 
     if edit or always_edit:
         json.dump(
@@ -68,6 +61,7 @@ def update(
 
 def metadata(
     *,
+    conf: Config,
     always_edit: bool,
     source_dir: str,
 ) -> int:
@@ -78,11 +72,12 @@ def metadata(
     image_dir = os.path.join(output_dir, "images")
     metadata_dir = os.path.join(output_dir, "metadata")
     rets = 0
-    for file in os.listdir(image_dir):
-        prefix, ext = os.path.splitext(file)
+
+    for date in conf.dates:
+        prefix, ext = os.path.splitext(date.filename)
         if ext == ".jpg":
             ret = update(
-                os.path.join(image_dir, file),
+                os.path.join(image_dir, date.filename),
                 os.path.join(metadata_dir, prefix + os.path.extsep + "json"),
                 always_edit,
                 id,

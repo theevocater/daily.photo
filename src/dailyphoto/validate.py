@@ -1,15 +1,46 @@
 import os
+from json import JSONDecodeError
 from typing import Any
 
 from .config import Config
 from .config import get_metadata_filename
 from .config import IMAGES
+from .config import Metadata
 from .config import METADATA_DIR
 from .config import read_metadata
 
 
 def valid_str(value: Any) -> bool:
     return isinstance(value, str) and len(value) > 0
+
+
+def validate_metadata(meta_filename: str, meta: Metadata) -> bool:
+    ret = True
+    if meta.model_extra and len(meta.model_extra.items()) > 0:
+        print(f"{meta_filename} has extra fields: {meta.model_extra}")
+        ret = False
+
+    if not valid_str(meta.alt):
+        print(f"{meta_filename} has invalid alt text: {meta.alt}")
+        ret = False
+
+    if not valid_str(meta.camera):
+        print(f"{meta_filename} has invalid camera text: {meta.camera}")
+        ret = False
+
+    if not valid_str(meta.film):
+        print(f"{meta_filename} has invalid film text: {meta.film}")
+        ret = False
+
+    if not valid_str(meta.subtitle):
+        print(f"{meta_filename} has invalid subtitle text: {meta.subtitle}")
+        ret = False
+
+    if isinstance(meta.date, str):
+        print(f"{meta_filename} has invalid date: {meta.date}")
+        ret = False
+
+    return ret
 
 
 def validate(*, conf: Config) -> int:
@@ -33,22 +64,19 @@ def validate(*, conf: Config) -> int:
             ret += 1
 
         metadata_file = get_metadata_filename(METADATA_DIR, date.filename)
-        metadata = read_metadata(metadata_file)
+        try:
+            metadata = read_metadata(metadata_file)
+        except JSONDecodeError as e:
+            ret += 1
+            print(f"Entry {date.day}: {metadata_file} json parsing failed\n{e}")
+            continue
+
         if metadata is None:
             ret += 1
             print(f"Entry {date} unable to load {metadata_file}")
             continue
 
-        # TODO extra should we allow them? how to ahndle
-        metadata.model_extra
-
-        # Validate field values.
-        valid_str(metadata.alt)
-        valid_str(metadata.camera)
-        valid_str(metadata.film)
-        valid_str(metadata.subtitle)
-        if isinstance(metadata.date, str):
-            print(f"{metadata_file} has invalid date {metadata.date}")
+        if not validate_metadata(metadata_file, metadata):
             ret += 1
 
     disk_files = set()

@@ -18,26 +18,19 @@ OUTPUT_DIR = "generated"
 OUTPUT_IMAGES = "images"
 TEMPLATE = "template.html"
 
-METADATA_TEMPLATE = {
-    "alt": "",
-    "camera": "",
-    "date": "",
-    "film": "",
-    "subtitle": "",
-}
 
 ShortDatetime = Annotated[
     datetime,
     BeforeValidator(lambda ds: datetime.strptime(ds, "%Y%m%d")),
-    PlainSerializer(lambda dt: dt.strftime("%Y%m%d")),
+    PlainSerializer(lambda dt: dt.strftime("%Y%m%d") if dt else ""),
 ]
 
 
 class Metadata(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
     alt: str = ""
     camera: str = ""
-    date: ShortDatetime | str = ""
+    date: ShortDatetime | None = None
     film: str = ""
     subtitle: str = ""
 

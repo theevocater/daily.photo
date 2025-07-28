@@ -38,13 +38,7 @@ def exif_to_metadata(image_file: str, metadata: Metadata) -> None:
     dto = ifd_tags.get(Base["DateTimeOriginal"])
     exif_date = None
     if dto:
-        exif_date = (
-            datetime.strftime(
-                datetime.strptime(dto, "%Y:%m:%d %H:%M:%S"),
-                "%Y%m%d",
-            )
-            or None
-        )
+        exif_date = datetime.strptime(dto, "%Y:%m:%d %H:%M:%S") or None
 
     if make and model and metadata.camera == "":
         metadata.camera = f"{make} {model}"
