@@ -15,6 +15,8 @@ def valid_str(value: Any) -> bool:
 
 
 def validate_metadata(meta_filename: str, meta: Metadata) -> bool:
+    # TODO we should have two metadata types -- one for complete metadata and one for ones we are working on before
+    # committing
     ret = True
     if meta.model_extra and len(meta.model_extra.items()) > 0:
         print(f"{meta_filename} has extra fields: {meta.model_extra}")
