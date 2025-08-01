@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from . import kitty
 from .config import Config
-from .config import Metadata
+from .config import MetadataEditable
 from .config import read_metadata
 from .config import write_metadata
 from .exif import exif_to_metadata
@@ -32,7 +32,8 @@ def update(
     window_id: str,
 ) -> int:
     try:
-        metadata = read_metadata(json_name) or Metadata()
+        # TODO read_metadata needs to do a editable
+        metadata = read_metadata(json_name, MetadataEditable) or MetadataEditable()
     except (json.decoder.JSONDecodeError, ValidationError) as e:
         # if the json is garbage, give it to me to edit it
         print(f"Unable to parse metadata file: {json_name}.", e)
@@ -42,6 +43,7 @@ def update(
     exif_to_metadata(image_name, metadata)
     write_metadata(json_name, metadata)
 
+    # TODO i think we load as metadata here and go through the errors, but i think that means we can probably flip this function around asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdf
     edit = always_edit or not validate_metadata(json_name, metadata)
 
     if edit or always_edit:

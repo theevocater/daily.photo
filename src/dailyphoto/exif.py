@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from dailyphoto.config import Metadata
+from dailyphoto.config import MetadataEditable
 from PIL import Image
 from PIL.ExifTags import Base
 from PIL.ExifTags import TAGS
@@ -27,7 +27,7 @@ def print_exif(image_files: list[str]) -> int:
     return 0
 
 
-def exif_to_metadata(image_file: str, metadata: Metadata) -> None:
+def exif_to_metadata(image_file: str, metadata: MetadataEditable) -> None:
     with Image.open(image_file) as image:
         exif_data = image.getexif()
     if exif_data is None:

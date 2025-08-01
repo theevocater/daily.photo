@@ -3,6 +3,8 @@ import json
 import os
 from datetime import datetime
 from typing import Annotated
+from typing import Type
+from typing import TypeVar
 
 from pydantic import BaseModel
 from pydantic import BeforeValidator
@@ -26,13 +28,27 @@ ShortDatetime = Annotated[
 ]
 
 
-class Metadata(BaseModel):
+class MetadataEditable(BaseModel):
+    """Represents newly generated image metadata. Used for adding + editing images when fields might be unset"""
+
     model_config = ConfigDict(extra="allow")
     alt: str = ""
     camera: str = ""
     date: ShortDatetime | None = None
     film: str = ""
     subtitle: str = ""
+
+
+class Metadata(BaseModel):
+    """Represents the final image metadata. Used for validation and generation to ensure that all fields are filled in and have certain properties."""
+
+    model_config = ConfigDict(extra="forbid")
+    # TODO add length here
+    alt: str
+    camera: str
+    date: ShortDatetime
+    film: str
+    subtitle: str
 
 
 def get_metadata_filename(metadata_dir: str, image: str) -> str:
@@ -42,17 +58,20 @@ def get_metadata_filename(metadata_dir: str, image: str) -> str:
     )
 
 
-def read_metadata(metadata_file: str) -> Metadata | None:
+T = TypeVar("T", bound=BaseModel)
+
+
+def read_metadata(metadata_file: str, model_cls: Type[T]) -> T | None:
     try:
         with open(metadata_file) as c:
             parsed = json.load(c)
-            return Metadata.model_validate(parsed)
+            return model_cls.model_validate(parsed)
     except FileNotFoundError as e:
         print(f"Unable to load metadata: {metadata_file}.", e)
         return None
 
 
-def write_metadata(metadata_file: str, metadata: Metadata) -> None:
+def write_metadata(metadata_file: str, metadata: Metadata | MetadataEditable) -> None:
     try:
         with open(metadata_file, "w") as c:
             c.write(metadata.model_dump_json(indent=2))

@@ -2,6 +2,8 @@ import os
 from json import JSONDecodeError
 from typing import Any
 
+from pydantic import ValidationError
+
 from .config import Config
 from .config import get_metadata_filename
 from .config import IMAGES
@@ -15,8 +17,7 @@ def valid_str(value: Any) -> bool:
 
 
 def validate_metadata(meta_filename: str, meta: Metadata) -> bool:
-    # TODO we should have two metadata types -- one for complete metadata and one for ones we are working on before
-    # committing
+    # TODO remove after validating that we don't need this
     ret = True
     if meta.model_extra and len(meta.model_extra.items()) > 0:
         print(f"{meta_filename} has extra fields: {meta.model_extra}")
@@ -67,19 +68,20 @@ def validate(*, conf: Config) -> int:
 
         metadata_file = get_metadata_filename(METADATA_DIR, date.filename)
         try:
-            metadata = read_metadata(metadata_file)
+            metadata = read_metadata(metadata_file, Metadata)
         except JSONDecodeError as e:
             ret += 1
             print(f"Entry {date.day}: {metadata_file} json parsing failed\n{e}")
+            continue
+        except ValidationError as e:
+            ret += 1
+            print(f"Entry {date.day}: {metadata_file} validation failed\n{str(e)}")
             continue
 
         if metadata is None:
             ret += 1
             print(f"Entry {date} unable to load {metadata_file}")
             continue
-
-        if not validate_metadata(metadata_file, metadata):
-            ret += 1
 
     disk_files = set()
     for root, dirs, files in os.walk(IMAGES):
