@@ -188,6 +188,11 @@ def setup_output_dir(output_dir: str) -> bool:
         print(f"Creating {main_css}")
         os.symlink("../main.css", main_css)
 
+    main_js = f"{output_dir}/main.js"
+    if not os.path.exists(main_js):
+        print(f"Creating {main_js}")
+        os.symlink("../main.js", main_js)
+
     return True
 
 
