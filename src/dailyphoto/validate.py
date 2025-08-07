@@ -1,8 +1,5 @@
 import os
-from json import JSONDecodeError
 from typing import Any
-
-from pydantic import ValidationError
 
 from .config import Config
 from .config import get_metadata_filename
@@ -67,16 +64,7 @@ def validate(*, conf: Config) -> int:
             ret += 1
 
         metadata_file = get_metadata_filename(METADATA_DIR, date.filename)
-        try:
-            metadata = read_metadata(metadata_file, Metadata)
-        except JSONDecodeError as e:
-            ret += 1
-            print(f"Entry {date.day}: {metadata_file} json parsing failed\n{e}")
-            continue
-        except ValidationError as e:
-            ret += 1
-            print(f"Entry {date.day}: {metadata_file} validation failed\n{str(e)}")
-            continue
+        metadata = read_metadata(metadata_file)
 
         if metadata is None:
             ret += 1

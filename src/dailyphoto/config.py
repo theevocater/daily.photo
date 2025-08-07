@@ -3,13 +3,13 @@ import json
 import os
 from datetime import datetime
 from typing import Annotated
-from typing import Type
-from typing import TypeVar
 
+from annotated_types import Len
 from pydantic import BaseModel
 from pydantic import BeforeValidator
 from pydantic import ConfigDict
 from pydantic import PlainSerializer
+from pydantic import ValidationError
 
 UNUSED = "queued"
 UNUSED_IMAGES = os.path.join(UNUSED, "images")
@@ -34,21 +34,23 @@ class MetadataEditable(BaseModel):
     model_config = ConfigDict(extra="allow")
     alt: str = ""
     camera: str = ""
-    date: ShortDatetime | None = None
+    date: ShortDatetime | str | None = None
     film: str = ""
     subtitle: str = ""
 
 
 class Metadata(BaseModel):
-    """Represents the final image metadata. Used for validation and generation to ensure that all fields are filled in and have certain properties."""
+    """
+    Represents the final image metadata.
+    Used for validation and generation to ensure that all fields are filled in and have certain properties.
+    """
 
     model_config = ConfigDict(extra="forbid")
-    # TODO add length here
-    alt: str
-    camera: str
+    alt: Annotated[str, Len(min_length=1)]
+    camera: Annotated[str, Len(min_length=1)]
     date: ShortDatetime
-    film: str
-    subtitle: str
+    film: Annotated[str, Len(min_length=1)]
+    subtitle: Annotated[str, Len(min_length=1)]
 
 
 def get_metadata_filename(metadata_dir: str, image: str) -> str:
@@ -58,16 +60,13 @@ def get_metadata_filename(metadata_dir: str, image: str) -> str:
     )
 
 
-T = TypeVar("T", bound=BaseModel)
-
-
-def read_metadata(metadata_file: str, model_cls: Type[T]) -> T | None:
+def read_metadata(metadata_file: str) -> Metadata | None:
     try:
         with open(metadata_file) as c:
             parsed = json.load(c)
-            return model_cls.model_validate(parsed)
-    except FileNotFoundError as e:
-        print(f"Unable to load metadata: {metadata_file}.", e)
+            return Metadata.model_validate(parsed)
+    except (FileNotFoundError, json.decoder.JSONDecodeError, ValidationError) as e:
+        print(f"Unable to load metadata: {metadata_file}.", str(e))
         return None
 
 
