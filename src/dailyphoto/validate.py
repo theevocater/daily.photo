@@ -4,43 +4,12 @@ from typing import Any
 from .config import Config
 from .config import get_metadata_filename
 from .config import IMAGES
-from .config import Metadata
 from .config import METADATA_DIR
 from .config import read_metadata
 
 
 def valid_str(value: Any) -> bool:
     return isinstance(value, str) and len(value) > 0
-
-
-def validate_metadata(meta_filename: str, meta: Metadata) -> bool:
-    # TODO remove after validating that we don't need this
-    ret = True
-    if meta.model_extra and len(meta.model_extra.items()) > 0:
-        print(f"{meta_filename} has extra fields: {meta.model_extra}")
-        ret = False
-
-    if not valid_str(meta.alt):
-        print(f"{meta_filename} has invalid alt text: {meta.alt}")
-        ret = False
-
-    if not valid_str(meta.camera):
-        print(f"{meta_filename} has invalid camera text: {meta.camera}")
-        ret = False
-
-    if not valid_str(meta.film):
-        print(f"{meta_filename} has invalid film text: {meta.film}")
-        ret = False
-
-    if not valid_str(meta.subtitle):
-        print(f"{meta_filename} has invalid subtitle text: {meta.subtitle}")
-        ret = False
-
-    if isinstance(meta.date, str):
-        print(f"{meta_filename} has invalid date: {meta.date}")
-        ret = False
-
-    return ret
 
 
 def validate(*, conf: Config) -> int:
