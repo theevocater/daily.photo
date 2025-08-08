@@ -1,15 +1,10 @@
 import os
-from typing import Any
 
 from .config import Config
 from .config import get_metadata_filename
 from .config import IMAGES
 from .config import METADATA_DIR
 from .config import read_metadata
-
-
-def valid_str(value: Any) -> bool:
-    return isinstance(value, str) and len(value) > 0
 
 
 def validate(*, conf: Config) -> int:
