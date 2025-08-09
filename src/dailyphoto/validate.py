@@ -16,7 +16,14 @@ def validate(*, conf: Config) -> int:
 
     ret = 0
     config_files = set()
+    date_set = set()
     for date in dates:
+        # Check for duplicate dates
+        if date.day in date_set:
+            print(f"{date.day} exists more than once.")
+            ret += 1
+        date_set.add(date.day)
+
         # Check for dupes in the filenames
         if date.filename in config_files:
             print(f"Entry {date}: {date.filename} is duplicate")
