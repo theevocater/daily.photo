@@ -8,12 +8,12 @@ import tarfile
 from typing import TypedDict
 
 from .config import Config
-from .config import get_metadata_filename
 from .config import IMAGES
 from .config import METADATA_DIR
 from .config import OUTPUT_DIR
 from .config import OUTPUT_IMAGES
 from .config import TEMPLATE
+from .metadata import get_metadata_filename
 
 RSS_FEED_HEADER = """\
 <?xml version="1.0" encoding="utf-8"?>
@@ -114,6 +114,7 @@ def generate_day(
 
     print(f"Generating {output_name}")
 
+    # TODO replace with new metadtat
     with open(metadata_file) as f:
         metadata = json.load(f)
 

@@ -1,9 +1,10 @@
 from datetime import datetime
 
-from dailyphoto.config import MetadataEditable
 from PIL import Image
 from PIL.ExifTags import Base
 from PIL.ExifTags import TAGS
+
+from .metadata import MetadataEditable
 
 
 def print_exif(image_files: list[str]) -> int:

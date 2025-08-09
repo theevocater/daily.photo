@@ -2,15 +2,69 @@ import json
 import os
 import subprocess
 import sys
+from typing import Annotated
 
+from annotated_types import Len
+from pydantic import BaseModel
+from pydantic import ConfigDict
 from pydantic import ValidationError
 
 from . import kitty
 from .config import Config
-from .config import Metadata
-from .config import MetadataEditable
-from .config import write_metadata
+from .config import ShortDatetime
 from .exif import exif_to_metadata
+
+
+class MetadataEditable(BaseModel):
+    """Represents newly generated image metadata. Used for adding + editing images when fields might be unset"""
+
+    model_config = ConfigDict(extra="allow")
+    alt: str = ""
+    camera: str = ""
+    date: ShortDatetime | str | None = None
+    film: str = ""
+    subtitle: str = ""
+
+
+class Metadata(BaseModel):
+    """
+    Represents the final image metadata.
+    Used for validation and generation to ensure that all fields are filled in and have certain properties.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    alt: Annotated[str, Len(min_length=1)]
+    camera: Annotated[str, Len(min_length=1)]
+    date: ShortDatetime
+    film: Annotated[str, Len(min_length=1)]
+    subtitle: Annotated[str, Len(min_length=1)]
+
+
+def get_metadata_filename(metadata_dir: str, image: str) -> str:
+    return os.path.join(
+        metadata_dir,
+        os.path.splitext(os.path.basename(image))[0] + ".json",
+    )
+
+
+def read_metadata(metadata_file: str) -> Metadata | None:
+    try:
+        with open(metadata_file) as c:
+            parsed = json.load(c)
+            return Metadata.model_validate(parsed)
+    except (FileNotFoundError, json.decoder.JSONDecodeError, ValidationError) as e:
+        print(f"Unable to load metadata: {metadata_file}.", str(e))
+        return None
+
+
+def write_metadata(metadata_file: str, metadata: Metadata | MetadataEditable) -> None:
+    try:
+        with open(metadata_file, "w") as c:
+            c.write(metadata.model_dump_json(indent=2))
+            # include a final line ending
+            c.write("\n")
+    except OSError as e:
+        print(f"Unable to write metadata: {metadata_file}.", e)
 
 
 def edit_json(json_name: str, image_name: str, window_id: str) -> int:

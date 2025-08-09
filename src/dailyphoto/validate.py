@@ -1,10 +1,10 @@
 import os
 
 from .config import Config
-from .config import get_metadata_filename
 from .config import IMAGES
 from .config import METADATA_DIR
-from .config import read_metadata
+from .metadata import get_metadata_filename
+from .metadata import read_metadata
 
 
 def validate(*, conf: Config) -> int:
