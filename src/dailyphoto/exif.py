@@ -4,6 +4,8 @@ from PIL import Image
 from PIL.ExifTags import Base
 from PIL.ExifTags import TAGS
 
+from .types import MetadataEditable
+
 
 def print_exif(image_files: list[str]) -> int:
     for image in image_files:
@@ -26,7 +28,7 @@ def print_exif(image_files: list[str]) -> int:
     return 0
 
 
-def exif_to_metadata(image_file: str, metadata: dict[str, str]) -> None:
+def exif_to_metadata(image_file: str, metadata: MetadataEditable) -> None:
     with Image.open(image_file) as image:
         exif_data = image.getexif()
     if exif_data is None:
@@ -37,19 +39,13 @@ def exif_to_metadata(image_file: str, metadata: dict[str, str]) -> None:
     dto = ifd_tags.get(Base["DateTimeOriginal"])
     exif_date = None
     if dto:
-        exif_date = (
-            datetime.strftime(
-                datetime.strptime(dto, "%Y:%m:%d %H:%M:%S"),
-                "%Y%m%d",
-            )
-            or None
-        )
+        exif_date = datetime.strptime(dto, "%Y:%m:%d %H:%M:%S") or None
 
-    if make and model and metadata["camera"] == "":
-        metadata["camera"] = f"{make} {model}"
+    if make and model and metadata.camera == "":
+        metadata.camera = f"{make} {model}"
     # Always trust the camera for digital cameras
     if exif_date and make == "FUJIFILM":
-        metadata["date"] = exif_date
+        metadata.date = exif_date
     # seed the date if we don't have one at all
-    elif exif_date and metadata["date"] == "":
-        metadata["date"] = exif_date
+    elif exif_date and metadata.date == "":
+        metadata.date = exif_date

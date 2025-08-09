@@ -3,9 +3,40 @@ import os
 import subprocess
 import sys
 
+from pydantic import ValidationError
+
 from . import kitty
-from .config import METADATA_TEMPLATE
+from .config import Config
 from .exif import exif_to_metadata
+from .types import Metadata
+from .types import MetadataEditable
+
+
+def get_metadata_filename(metadata_dir: str, image: str) -> str:
+    return os.path.join(
+        metadata_dir,
+        os.path.splitext(os.path.basename(image))[0] + ".json",
+    )
+
+
+def read_metadata(metadata_file: str) -> Metadata | None:
+    try:
+        with open(metadata_file) as c:
+            parsed = json.load(c)
+            return Metadata.model_validate(parsed)
+    except (FileNotFoundError, json.decoder.JSONDecodeError, ValidationError) as e:
+        print(f"Unable to load metadata: {metadata_file}.", str(e))
+        return None
+
+
+def write_metadata(metadata_file: str, metadata: Metadata | MetadataEditable) -> None:
+    try:
+        with open(metadata_file, "w") as c:
+            c.write(metadata.model_dump_json(indent=2))
+            # include a final line ending
+            c.write("\n")
+    except OSError as e:
+        print(f"Unable to write metadata: {metadata_file}.", e)
 
 
 def edit_json(json_name: str, image_name: str, window_id: str) -> int:
@@ -19,64 +50,46 @@ def edit_json(json_name: str, image_name: str, window_id: str) -> int:
     return subprocess.call(["nvim", json_name])
 
 
-def write_metadata(metadata: dict[str, str], json_name: str) -> None:
-    try:
-        with open(json_name, "w") as f:
-            json.dump(
-                metadata,
-                f,
-                sort_keys=True,
-                indent=2,
-            )
-            f.write(os.linesep)
-    except OSError as e:
-        print(f"Error writing to file {json_name}: {e}")
-
-
 def update(
     image_name: str,
     json_name: str,
     always_edit: bool,
     window_id: str,
-    fields: set[str] | None,
 ) -> int:
-    if not os.path.exists(json_name):
-        print("Creating missing {json_name}")
-        metadata = METADATA_TEMPLATE.copy()
-    else:
-        try:
-            with open(json_name) as f:
-                metadata = json.load(f)
-        except FileNotFoundError as e:
-            print(f"Unable to load metadata file: {json_name}.", e)
-            return 1
-        except json.decoder.JSONDecodeError as e:
-            # if the json is garbage, give it to me to edit it
-            print(f"Unable to parse metadata file: {json_name}.", e)
-            return edit_json(json_name, image_name, window_id)
-
-    # create or fix the metadata dict with data from the image
-    exif_to_metadata(image_name, metadata)
-    write_metadata(metadata, json_name)
-
+    # First attempt to validate the existing on disk metadata file to see if it needs edited.
     edit = always_edit
-    if fields is None:
-        # if we aren't editing a specific field, calculate symmetric
-        # distance of key sets to find if there are missing keys
-        missing_fields = set(metadata.keys()) ^ set(METADATA_TEMPLATE.keys())
-        if len(missing_fields) > 0:
-            print(f"{json_name} is missing {missing_fields}")
-        edit = len(missing_fields) > 0
+    json_dict = None
+    try:
+        with open(json_name) as c:
+            json_dict = json.load(c)
+    except FileNotFoundError as e:
+        print(f"Creating new metadata {json_name}.", e)
+    except json.decoder.JSONDecodeError as e:
+        # if the json is garbage just to edit it
+        print(f"Unable to parse metadata file: {json_name}.", e)
+        return edit_json(json_name, image_name, window_id)
 
-    for k, v in metadata.items():
-        if fields and k not in fields:
-            continue
-        if v == "":
+    metadata = MetadataEditable()
+    if json_dict is not None:
+        try:
+            Metadata.model_validate(json_dict)
+        except ValidationError as valid_e:
+            # If it fails to validate, we need to edit.
+            print(f"Metadata file {json_name} failed to validate:")
+            for x in valid_e.errors():
+                print(f"\tField {x['loc'][0]}: {x['msg']}")
             edit = True
+
+        # Load existing data
+        metadata = metadata.model_validate(json_dict)
+
+    # Update metadata with data from the image
+    exif_to_metadata(image_name, metadata)
+    write_metadata(json_name, metadata)
 
     if edit or always_edit:
         json.dump(
-            metadata,
+            metadata.model_dump(),
             sys.stdout,
             sort_keys=True,
             indent=2,
@@ -85,18 +98,15 @@ def update(
         print(f"editing {os.path.basename(image_name)}")
         return edit_json(json_name, image_name, window_id)
     else:
-        print(f"No need to edit {json_name}")
         return 0
 
 
 def metadata(
     *,
+    conf: Config,
     always_edit: bool,
-    fields_csv: str | None,
     source_dir: str,
 ) -> int:
-    fields = set(fields_csv.split(",")) if fields_csv else None
-
     id = kitty.new_window()
     kitty.set_layout("horizontal")
 
@@ -104,15 +114,15 @@ def metadata(
     image_dir = os.path.join(output_dir, "images")
     metadata_dir = os.path.join(output_dir, "metadata")
     rets = 0
-    for file in os.listdir(image_dir):
-        prefix, ext = os.path.splitext(file)
+
+    for date in conf.dates:
+        prefix, ext = os.path.splitext(date.filename)
         if ext == ".jpg":
             ret = update(
-                os.path.join(image_dir, file),
+                os.path.join(image_dir, date.filename),
                 os.path.join(metadata_dir, prefix + os.path.extsep + "json"),
                 always_edit,
                 id,
-                fields,
             )
             # -1 is the signal to quit since processes return positive numbers
             if ret < 0:

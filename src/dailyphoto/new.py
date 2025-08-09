@@ -5,6 +5,8 @@ from datetime import datetime
 from datetime import timedelta
 
 from . import config
+from .metadata import get_metadata_filename
+from .types import Date
 
 
 def new(
@@ -113,12 +115,12 @@ def new_image(
     shutil.move(old_image_path, new_image_path)
 
     # Try to move the metadata file
-    old_metadata_file = config.get_metadata_filename(
+    old_metadata_file = get_metadata_filename(
         config.UNUSED_METADATA,
         new_image,
     )
     if os.path.exists(old_metadata_file):
-        new_metadata_file = config.get_metadata_filename(
+        new_metadata_file = get_metadata_filename(
             config.METADATA_DIR,
             new_image,
         )
@@ -128,7 +130,7 @@ def new_image(
         print(f"{old_metadata_file} does not exist, no need to move")
 
     conf.dates.append(
-        config.Date.model_validate({"day": new_date, "filename": new_image}),
+        Date.model_validate({"day": new_date, "filename": new_image}),
     )
     print(f"Writing {config_file}")
     config.write_config(config_file, conf)

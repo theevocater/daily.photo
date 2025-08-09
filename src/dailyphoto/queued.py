@@ -2,14 +2,13 @@ import os
 import shutil
 
 from .config import Config
-from .config import Date
 from .config import UNUSED
 from .config import UNUSED_IMAGES
 from .config import UNUSED_METADATA
 
 
-def unused(dates: list[Date], new_image: str) -> bool:
-    for date in dates:
+def unused(conf: Config, new_image: str) -> bool:
+    for date in conf.dates:
         if date.filename == new_image:
             print(f"{date.filename} is already used on {date.day}")
             return False
@@ -38,8 +37,6 @@ def move(
 
 
 def queue_images(*, conf: Config, source_dir: str) -> int:
-    dates = conf.dates
-
     if not os.path.exists(source_dir):
         print(f"Error: unable to list {source_dir}")
         return 1
@@ -53,7 +50,7 @@ def queue_images(*, conf: Config, source_dir: str) -> int:
 
     with os.scandir(source_dir) as it:
         for entry in it:
-            if entry.is_file() and unused(dates, entry.name):
+            if entry.is_file() and unused(conf, entry.name):
                 ret = move(source_dir, entry.name)
                 if ret != 0:
                     return ret
