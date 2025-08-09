@@ -1,5 +1,4 @@
 import datetime
-import json
 import os
 import shutil
 import string
@@ -14,6 +13,7 @@ from .config import OUTPUT_DIR
 from .config import OUTPUT_IMAGES
 from .config import TEMPLATE
 from .metadata import get_metadata_filename
+from .metadata import read_metadata
 
 RSS_FEED_HEADER = """\
 <?xml version="1.0" encoding="utf-8"?>
@@ -47,10 +47,7 @@ def format_filename(output_dir: str, day: datetime.datetime) -> str:
     return os.path.join(output_dir, f"{day.strftime('%Y%m%d')}.html")
 
 
-def to_datetime(date_str: str) -> datetime.datetime:
-    return datetime.datetime.strptime(date_str, "%Y%m%d")
-
-
+# TODO convert to pydantic and align template with existing types
 class TemplateSubstitutions(TypedDict):
     yesterday: str
     tomorrow: str
@@ -78,10 +75,8 @@ def generate_html(
         f.write(html_content)
 
 
-def photo_date(date: str) -> str:
-    if not date:
-        return ""
-    return to_datetime(date).strftime("%B %d, %Y")
+def photo_date(date: datetime.datetime) -> str:
+    return date.strftime("%B %d, %Y")
 
 
 def rss_date(date: datetime.datetime) -> str:
@@ -114,14 +109,9 @@ def generate_day(
 
     print(f"Generating {output_name}")
 
-    # TODO replace with new metadtat
-    with open(metadata_file) as f:
-        metadata = json.load(f)
-
-    try:
-        shot_date = photo_date(metadata.get("date"))
-    except ValueError:
-        print(f"Unable to parse {metadata_file} date: {metadata.get('date')}")
+    metadata = read_metadata(metadata_file)
+    if metadata is None:
+        print(f"Unable to parse {metadata_file} date: {current_day}")
         # TODO: error handling shouldn't be immediate exit. need to better
         # collect and bubble errors
         sys.exit(1)
@@ -145,12 +135,12 @@ def generate_day(
             "yesterday": format_filename("/", prev_day),
             "tomorrow": tomorrow,
             "image": os.path.join(OUTPUT_IMAGES, image),
-            "alt": metadata["alt"],
-            "subtitle": metadata["subtitle"],
+            "alt": metadata.alt,
+            "subtitle": metadata.subtitle,
             "date": current_day.strftime("%B %d, %Y"),
-            "shot_date": shot_date,
-            "camera": metadata.get("camera", ""),
-            "film": metadata.get("film", ""),
+            "shot_date": photo_date(metadata.date),
+            "camera": metadata.camera,
+            "film": metadata.film,
         },
         output_name,
     )
@@ -160,10 +150,10 @@ def generate_day(
         return ""
 
     return RSS_FEED_ENTRY.format(
-        title=metadata["subtitle"],
+        title=metadata.subtitle,
         link=f"https://daily.photo/{current_day.strftime('%Y%m%d')}.html",
         date=rss_date(current_day),
-        alt=metadata["alt"],
+        alt=metadata.alt,
         img_link=f"https://daily.photo/{OUTPUT_IMAGES}/{image}",
     )
 
