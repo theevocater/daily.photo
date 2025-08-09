@@ -67,10 +67,7 @@ def new(
     else:
         last_day = datetime.strptime(dates[-1], "%Y%m%d")
 
-    dates += [
-        (last_day + timedelta(days=(i + 1))).strftime("%Y%m%d")
-        for i in range(0, max_days - len(dates))
-    ]
+    dates += [(last_day + timedelta(days=(i + 1))).strftime("%Y%m%d") for i in range(0, max_days - len(dates))]
 
     for date, image in zip(dates, images):
         new_image(

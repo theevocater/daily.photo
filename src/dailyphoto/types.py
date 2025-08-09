@@ -7,7 +7,6 @@ from pydantic import BeforeValidator
 from pydantic import ConfigDict
 from pydantic import PlainSerializer
 
-
 ShortDatetime = Annotated[
     datetime,
     BeforeValidator(lambda ds: datetime.strptime(ds, "%Y%m%d")),
@@ -25,7 +24,10 @@ class Config(BaseModel):
 
 
 class MetadataEditable(BaseModel):
-    """Represents newly generated image metadata. Used for adding + editing images when fields might be unset"""
+    """
+    Represents newly generated image metadata.
+    Used for adding + editing images when fields might be unset
+    """
 
     model_config = ConfigDict(extra="allow")
     alt: str = ""
