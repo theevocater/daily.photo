@@ -62,8 +62,9 @@ def update(
     try:
         with open(json_name) as c:
             json_dict = json.load(c)
-    except FileNotFoundError as e:
-        print(f"Creating new metadata {json_name}.", e)
+    except FileNotFoundError:
+        print(f"Creating new metadata {json_name}.")
+        edit = True
     except json.decoder.JSONDecodeError as e:
         # if the json is garbage just to edit it
         print(f"Unable to parse metadata file: {json_name}.", e)
