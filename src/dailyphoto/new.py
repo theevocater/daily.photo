@@ -6,6 +6,7 @@ from datetime import timedelta
 
 from . import config
 from .metadata import get_metadata_filename
+from .types import Date
 
 
 def new(
@@ -129,7 +130,7 @@ def new_image(
         print(f"{old_metadata_file} does not exist, no need to move")
 
     conf.dates.append(
-        config.Date.model_validate({"day": new_date, "filename": new_image}),
+        Date.model_validate({"day": new_date, "filename": new_image}),
     )
     print(f"Writing {config_file}")
     config.write_config(config_file, conf)

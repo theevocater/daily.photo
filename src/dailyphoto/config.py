@@ -1,12 +1,8 @@
 import functools
 import json
 import os
-from datetime import datetime
-from typing import Annotated
 
-from pydantic import BaseModel
-from pydantic import BeforeValidator
-from pydantic import PlainSerializer
+from .types import Config
 
 UNUSED = "queued"
 UNUSED_IMAGES = os.path.join(UNUSED, "images")
@@ -16,22 +12,6 @@ METADATA_DIR = "current/metadata"
 OUTPUT_DIR = "generated"
 OUTPUT_IMAGES = "images"
 TEMPLATE = "template.html"
-
-
-ShortDatetime = Annotated[
-    datetime,
-    BeforeValidator(lambda ds: datetime.strptime(ds, "%Y%m%d")),
-    PlainSerializer(lambda dt: dt.strftime("%Y%m%d") if dt else ""),
-]
-
-
-class Date(BaseModel):
-    day: ShortDatetime
-    filename: str
-
-
-class Config(BaseModel):
-    dates: list[Date]
 
 
 @functools.cache
