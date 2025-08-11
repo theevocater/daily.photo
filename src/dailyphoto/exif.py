@@ -47,5 +47,5 @@ def exif_to_metadata(image_file: str, metadata: MetadataEditable) -> None:
     if exif_date and make == "FUJIFILM":
         metadata.date = exif_date
     # seed the date if we don't have one at all
-    elif exif_date and metadata.date == "":
+    elif exif_date and not metadata.date:
         metadata.date = exif_date
