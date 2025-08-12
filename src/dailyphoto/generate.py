@@ -1,4 +1,5 @@
 import datetime
+import html
 import os
 import shutil
 import string
@@ -33,8 +34,11 @@ RSS_FEED_ENTRY = """
     <title>{title}</title>
     <link href="{link}"/>
     <id>{link}</id>
-    <summary type="html">
-        &lt;img src="{img_link}" title="{alt}" alt="{alt}" /&gt;
+    <summary type="xhtml">
+      <div xmlns="http://www.w3.org/1999/xhtml">
+        <div><img src="{img_link}" title="{alt}" alt="{alt}" /></div>
+        <p>"{subtitle}"</p>
+      </div>
     </summary>
     <updated>{date}</updated>
   </entry>
@@ -153,8 +157,9 @@ def generate_day(
         title=metadata.subtitle,
         link=f"https://daily.photo/{current_day.strftime('%Y%m%d')}.html",
         date=rss_date(current_day),
-        alt=metadata.alt,
+        alt=html.escape(metadata.alt),
         img_link=f"https://daily.photo/{OUTPUT_IMAGES}/{image}",
+        subtitle=html.escape(metadata.subtitle),
     )
 
 
