@@ -219,7 +219,7 @@ def create_tar_gz_with_symlinks(source_dir: str, output_filename: str) -> None:
                     )
 
 
-def generate(*, conf: Config) -> int:
+def generate(*, conf: Config, tar: bool) -> int:
     print("Generating site")
     if not setup_output_dir(OUTPUT_DIR):
         return 1
@@ -279,5 +279,6 @@ def generate(*, conf: Config) -> int:
     with open(rss_file, "w") as rss:
         rss.write(rss_feed)
 
-    create_tar_gz_with_symlinks(OUTPUT_DIR, "dailyphoto.tar.gz")
+    if tar:
+        create_tar_gz_with_symlinks(OUTPUT_DIR, "dailyphoto.tar.gz")
     return 0
