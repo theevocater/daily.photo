@@ -1,3 +1,4 @@
+import logging
 import os
 import random
 import shutil
@@ -7,6 +8,8 @@ from datetime import timedelta
 from . import config
 from .metadata import get_metadata_filename
 from .types import Date
+
+logger = logging.getLogger(__name__)
 
 
 def new(
@@ -94,10 +97,10 @@ def new_image(
     # Detect if a date or image has been used before
     for date in conf.dates:
         if date.day == new_date:
-            print(f"Error: already have an image for {new_date}")
+            logger.error(f"already have an image for {new_date}")
             return 1
         if new_image and date.filename == new_image:
-            print(f"Error: {new_image} was already used on {date.day}")
+            logger.error(f"{new_image} was already used on {date.day}")
             return 1
 
     # Move the image
@@ -105,10 +108,10 @@ def new_image(
 
     old_image_path = os.path.join(config.UNUSED_IMAGES, new_image)
     if not os.path.exists(old_image_path):
-        print(f"Error: {old_image_path} does not exist")
+        logger.error(f"{old_image_path} does not exist")
         return 1
     new_image_path = os.path.join(config.IMAGES, new_image)
-    print(f"Moving {old_image_path} to {new_image_path}")
+    logger.info(f"Moving {old_image_path} to {new_image_path}")
     shutil.move(old_image_path, new_image_path)
 
     # Try to move the metadata file
@@ -121,16 +124,16 @@ def new_image(
             config.METADATA_DIR,
             new_image,
         )
-        print(f"Moving {old_metadata_file} to {new_metadata_file}")
+        logger.info(f"Moving {old_metadata_file} to {new_metadata_file}")
         shutil.move(old_metadata_file, new_metadata_file)
     else:
-        print(f"{old_metadata_file} does not exist, no need to move")
+        logger.warning(f"{old_metadata_file} does not exist, no need to move")
 
     conf.dates.append(
         Date.model_validate({"day": new_date, "filename": new_image}),
     )
-    print(f"Writing {config_file}")
+    logger.info(f"Writing {config_file}")
     config.write_config(config_file, conf)
 
-    print(f"Added {new_date}: {new_image}")
+    logger.info(f"Added {new_date}: {new_image}")
     return 0

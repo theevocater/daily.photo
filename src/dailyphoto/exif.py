@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from PIL import Image
@@ -5,6 +6,8 @@ from PIL.ExifTags import Base
 from PIL.ExifTags import TAGS
 
 from .types import MetadataEditable
+
+logger = logging.getLogger(__name__)
 
 
 def print_exif(image_files: list[str]) -> int:
@@ -15,16 +18,16 @@ def print_exif(image_files: list[str]) -> int:
                 if exif_data is not None:
                     for tag_id, value in exif_data.items():
                         tag = TAGS.get(tag_id, tag_id)
-                        print(f"{tag}: {value}")
+                        logger.info(f"{tag}: {value}")
                     for tag_id, value in exif_data.get_ifd(
                         Image.ExifTags.IFD.Exif,
                     ).items():
                         tag = TAGS.get(tag_id, tag_id)
-                        print(f"{tag}: {value}")
+                        logger.info(f"{tag}: {value}")
                 else:
-                    print(f"No EXIF data found for {image}.")
+                    logger.warning(f"No EXIF data found for {image}.")
         except Exception as e:
-            print(f"Error reading EXIF data from {image}: {e}")
+            logger.error(f"Error reading EXIF data from {image}: {e}")
     return 0
 
 

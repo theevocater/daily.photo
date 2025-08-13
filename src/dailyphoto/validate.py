@@ -1,3 +1,4 @@
+import logging
 import os
 
 from .config import Config
@@ -6,12 +7,14 @@ from .config import METADATA_DIR
 from .metadata import get_metadata_filename
 from .metadata import read_metadata
 
+logger = logging.getLogger(__name__)
+
 
 def validate(*, conf: Config) -> int:
     dates = conf.dates
 
     if dates is None or len(dates) == 0:
-        print("No dates set in config")
+        logger.error("No dates set in config")
         return 1
 
     ret = 0
@@ -20,18 +23,18 @@ def validate(*, conf: Config) -> int:
     for date in dates:
         # Check for duplicate dates
         if date.day in date_set:
-            print(f"{date.day} exists more than once.")
+            logger.error(f"{date.day} exists more than once.")
             ret += 1
         date_set.add(date.day)
 
         # Check for dupes in the filenames
         if date.filename in config_files:
-            print(f"Entry {date}: {date.filename} is duplicate")
+            logger.error(f"Entry {date}: {date.filename} is duplicate")
             ret += 1
         config_files.add(date.filename)
 
         if not os.path.exists(os.path.join(IMAGES, date.filename)):
-            print(f"Entry {date}: {date.filename} missing jpg")
+            logger.error(f"Entry {date}: {date.filename} missing jpg")
             ret += 1
 
         metadata_file = get_metadata_filename(METADATA_DIR, date.filename)
@@ -39,17 +42,17 @@ def validate(*, conf: Config) -> int:
 
         if metadata is None:
             ret += 1
-            print(f"Entry {date} unable to load {metadata_file}")
+            logger.error(f"Entry {date} unable to load {metadata_file}")
             continue
 
     disk_files = set()
     for root, dirs, files in os.walk(IMAGES):
         if root != IMAGES:
-            print(f"{IMAGES} contains unknown dir {root}")
+            logger.error(f"{IMAGES} contains unknown dir {root}")
             ret += 1
 
         if len(dirs) != 0:
-            print(f"extra dirs detected see {dirs}")
+            logger.error(f"extra dirs detected see {dirs}")
             ret += 1
 
         for file in files:
@@ -57,14 +60,10 @@ def validate(*, conf: Config) -> int:
 
     diff = config_files.difference(disk_files)
     if len(diff) != 0:
-        print(
-            f"Missing images in config_files {diff}",
-        )
+        logger.error(f"Missing images in config_files {diff}")
 
     diff = disk_files.difference(config_files)
     if len(diff) != 0:
-        print(
-            f"Unexpected files on disk: {diff}",
-        )
+        logger.error(f"Unexpected files on disk: {diff}")
 
     return ret
