@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import subprocess
 import sys
@@ -10,6 +11,8 @@ from .config import Config
 from .exif import exif_to_metadata
 from .types import Metadata
 from .types import MetadataEditable
+
+logger = logging.getLogger(__name__)
 
 
 def get_metadata_filename(metadata_dir: str, image: str) -> str:
@@ -25,7 +28,7 @@ def read_metadata(metadata_file: str) -> Metadata | None:
             parsed = json.load(c)
             return Metadata.model_validate(parsed)
     except (FileNotFoundError, json.decoder.JSONDecodeError, ValidationError) as e:
-        print(f"Unable to load metadata: {metadata_file}.", str(e))
+        logger.error(f"Unable to load metadata: {metadata_file}. {e}")
         return None
 
 
@@ -36,7 +39,7 @@ def write_metadata(metadata_file: str, metadata: Metadata | MetadataEditable) ->
             # include a final line ending
             c.write("\n")
     except OSError as e:
-        print(f"Unable to write metadata: {metadata_file}.", e)
+        logger.error(f"Unable to write metadata: {metadata_file}. {e}")
 
 
 def edit_json(json_name: str, image_name: str, window_id: str) -> int:
@@ -63,11 +66,11 @@ def update(
         with open(json_name) as c:
             json_dict = json.load(c)
     except FileNotFoundError:
-        print(f"Creating new metadata {json_name}.")
+        logger.info(f"Creating new metadata {json_name}.")
         edit = True
     except json.decoder.JSONDecodeError as e:
         # if the json is garbage just to edit it
-        print(f"Unable to parse metadata file: {json_name}.", e)
+        logger.error(f"Unable to parse metadata file: {json_name}. {e}")
         return edit_json(json_name, image_name, window_id)
 
     metadata = MetadataEditable()
@@ -76,9 +79,9 @@ def update(
             Metadata.model_validate(json_dict)
         except ValidationError as valid_e:
             # If it fails to validate, we need to edit.
-            print(f"Metadata file {json_name} failed to validate:")
+            logger.error(f"Metadata file {json_name} failed to validate:")
             for x in valid_e.errors():
-                print(f"\tField {x['loc'][0]}: {x['msg']}")
+                logger.error(f"\tField {x['loc'][0]}: {x['msg']}")
             edit = True
 
         # Load existing data
@@ -95,8 +98,7 @@ def update(
             sort_keys=True,
             indent=2,
         )
-        print()
-        print(f"editing {os.path.basename(image_name)}")
+        logger.info(f"editing {os.path.basename(image_name)}")
         return edit_json(json_name, image_name, window_id)
     else:
         return 0

@@ -1,4 +1,5 @@
 import argparse
+import logging
 
 from . import config
 from .exif import print_exif
@@ -15,6 +16,11 @@ def main(argv: list[str] | None = None) -> int:
         "--config-file",
         help="Path to config file. defaults to ./config.json",
         default="config.json",
+    )
+    parser.add_argument(
+        "--verbose",
+        help="Set log level to info",
+        action="store_true",
     )
     subparsers = parser.add_subparsers(dest="function")
     sp = subparsers.add_parser(
@@ -76,6 +82,17 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     args = parser.parse_args(argv)
+
+    if args.verbose:
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        )
+    else:
+        logging.basicConfig(
+            level=logging.ERROR,
+            format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        )
 
     conf = config.read_config(args.config_file)
     if conf is None:

@@ -1,5 +1,6 @@
 import datetime
 import html
+import logging
 import os
 import shutil
 import string
@@ -15,6 +16,8 @@ from .config import OUTPUT_IMAGES
 from .config import TEMPLATE
 from .metadata import get_metadata_filename
 from .metadata import read_metadata
+
+logger = logging.getLogger(__name__)
 
 RSS_FEED_HEADER = """\
 <?xml version="1.0" encoding="utf-8"?>
@@ -111,11 +114,11 @@ def generate_day(
     else:
         output_name = format_filename(output_dir, current_day)
 
-    print(f"Generating {output_name}")
+    logger.info(f"Generating {output_name}")
 
     metadata = read_metadata(metadata_file)
     if metadata is None:
-        print(f"Unable to parse {metadata_file} date: {current_day}")
+        logger.error(f"Unable to parse {metadata_file} date: {current_day}")
         # TODO: error handling shouldn't be immediate exit. need to better
         # collect and bubble errors
         sys.exit(1)
@@ -171,22 +174,22 @@ def setup_output_dir(output_dir: str) -> bool:
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
 
-    print(f"Creating {output_dir}")
+    logger.info(f"Creating {output_dir}")
     os.mkdir(output_dir)
 
     images = os.path.join(output_dir, OUTPUT_IMAGES)
     if not os.path.exists(images):
-        print(f"Creating {images}")
+        logger.info(f"Creating {images}")
         os.mkdir(images)
 
     main_css = f"{output_dir}/main.css"
     if not os.path.exists(main_css):
-        print(f"Creating {main_css}")
+        logger.info(f"Creating {main_css}")
         os.symlink("../main.css", main_css)
 
     main_js = f"{output_dir}/main.js"
     if not os.path.exists(main_js):
-        print(f"Creating {main_js}")
+        logger.info(f"Creating {main_js}")
         os.symlink("../main.js", main_js)
 
     return True
@@ -220,7 +223,7 @@ def create_tar_gz_with_symlinks(source_dir: str, output_filename: str) -> None:
 
 
 def generate(*, conf: Config, tar: bool) -> int:
-    print("Generating site")
+    logger.info("Generating site")
     if not setup_output_dir(OUTPUT_DIR):
         return 1
 
@@ -275,7 +278,7 @@ def generate(*, conf: Config, tar: bool) -> int:
 
     rss_feed += RSS_FEED_TRAILER
     rss_file = os.path.join(OUTPUT_DIR, "rss.xml")
-    print(f"Writing {rss_file}")
+    logger.info(f"Writing {rss_file}")
     with open(rss_file, "w") as rss:
         rss.write(rss_feed)
 
