@@ -21,6 +21,7 @@ def main(argv: list[str] | None = None) -> int:
         "generate",
         help="default: Generate static site suitable for gh pages",
     )
+    sp.add_argument("--no-tar", default=True, dest="tar", action="store_false", help="Disable creation of tarball")
 
     sp = subparsers.add_parser(
         "new",
@@ -102,4 +103,4 @@ def main(argv: list[str] | None = None) -> int:
     elif args.function == "exif":
         return print_exif(args.images)
     else:
-        return generate(conf=conf)
+        return generate(conf=conf, tar=args.tar)
