@@ -1,5 +1,4 @@
 import datetime
-import functools
 import html
 import importlib.resources
 import logging
@@ -70,7 +69,6 @@ class TemplateSubstitutions(TypedDict):
     film: str
 
 
-@functools.cache
 def get_resource(filename: str) -> str:
     return importlib.resources.read_text(resources, filename)
 
