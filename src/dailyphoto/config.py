@@ -14,7 +14,6 @@ IMAGES = "current/images"
 METADATA_DIR = "current/metadata"
 OUTPUT_DIR = "generated"
 OUTPUT_IMAGES = "images"
-TEMPLATE = "template.html"
 
 
 @functools.cache

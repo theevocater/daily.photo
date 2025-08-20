@@ -1,5 +1,6 @@
 import datetime
 import html
+import importlib.resources
 import logging
 import os
 import shutil
@@ -8,14 +9,15 @@ import sys
 import tarfile
 from typing import TypedDict
 
+
 from .config import Config
 from .config import IMAGES
 from .config import METADATA_DIR
 from .config import OUTPUT_DIR
 from .config import OUTPUT_IMAGES
-from .config import TEMPLATE
 from .metadata import get_metadata_filename
 from .metadata import read_metadata
+from . import resources
 
 logger = logging.getLogger(__name__)
 
@@ -67,13 +69,16 @@ class TemplateSubstitutions(TypedDict):
     film: str
 
 
+def get_resource(filename: str) -> str:
+    return importlib.resources.read_text(resources, filename)
+
+
 def generate_html(
-    template_filename: str,
     data: TemplateSubstitutions,
     output_filename: str,
 ) -> None:
-    with open(template_filename) as f:
-        daily_template = string.Template("".join(f.readlines()))
+    tmpl = get_resource("template.html")
+    daily_template = string.Template(tmpl)
 
     # TODO check that this fully substituted or use better templating
     html_content = daily_template.substitute(data)
@@ -105,7 +110,6 @@ def generate_day(
     next_day: datetime.datetime,
     image: str,
     metadata_file: str,
-    template: str,
     index: bool,
     output_dir: str,
 ) -> str:
@@ -137,7 +141,6 @@ def generate_day(
         tomorrow = "index.html"
 
     generate_html(
-        template,
         {
             "yesterday": format_filename("/", prev_day),
             "tomorrow": tomorrow,
@@ -183,14 +186,14 @@ def setup_output_dir(output_dir: str) -> bool:
         os.mkdir(images)
 
     main_css = f"{output_dir}/main.css"
-    if not os.path.exists(main_css):
+    with open(main_css, "w") as f:
         logger.info(f"Creating {main_css}")
-        os.symlink("../main.css", main_css)
+        f.write(get_resource("main.css"))
 
     main_js = f"{output_dir}/main.js"
-    if not os.path.exists(main_js):
+    with open(main_js, "w") as f:
         logger.info(f"Creating {main_js}")
-        os.symlink("../main.js", main_js)
+        f.write(get_resource("main.js"))
 
     return True
 
@@ -260,7 +263,6 @@ def generate(*, conf: Config, tar: bool) -> int:
                 image=date.filename,
                 index=True,
                 metadata_file=metadata_file,
-                template=TEMPLATE,
                 output_dir=OUTPUT_DIR,
             )
 
@@ -272,7 +274,6 @@ def generate(*, conf: Config, tar: bool) -> int:
             image=date.filename,
             index=False,
             metadata_file=metadata_file,
-            template=TEMPLATE,
             output_dir=OUTPUT_DIR,
         )
 
