@@ -29,28 +29,15 @@ class WatchHandler(FileSystemEventHandler):
             logger.debug(f"Skipping event {event} (rate limited)")
 
 
-class Watcher:
-    def __init__(self, conf: Config, path: str):
-        self.path = path
-        self.event_handler = WatchHandler(conf)
-        self.observer = Observer()
-        self.thread = None
-
-    def start(self) -> None:
-        self.observer.schedule(self.event_handler, self.path, recursive=True)
-        self.observer.start()
-        try:
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            self.stop()
-
-    def stop(self) -> None:
-        self.observer.stop()
-        self.observer.join()
-
-
 def watch(*, conf: Config, path: str) -> int:
-    watcher = Watcher(conf, path)
-    watcher.start()
+    event_handler = WatchHandler(conf)
+    observer = Observer()
+    observer.schedule(event_handler, path, recursive=True)
+    observer.start()
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+        observer.join()
     return 0
