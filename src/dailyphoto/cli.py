@@ -1,6 +1,8 @@
 import argparse
 import logging
 
+from dailyphoto.watch import watch
+
 from . import config
 from .exif import print_exif
 from .generate import generate
@@ -81,6 +83,16 @@ def main(argv: list[str] | None = None) -> int:
         nargs="*",
     )
 
+    sp = subparsers.add_parser(
+        "watch",
+        help="Watch [path] for changes and generate",
+    )
+    sp.add_argument(
+        "path",
+        help="Path to watch",
+        default=".",
+    )
+
     args = parser.parse_args(argv)
 
     if args.verbose:
@@ -119,5 +131,10 @@ def main(argv: list[str] | None = None) -> int:
         )
     elif args.function == "exif":
         return print_exif(args.images)
-    else:
+    elif args.function == "generate":
         return generate(conf=conf, tar=args.tar)
+    elif args.function == "watch":
+        return watch(conf=conf, path=args.path)
+    else:
+        parser.parse_args(["-h"])
+        return 1

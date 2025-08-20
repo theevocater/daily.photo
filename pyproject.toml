@@ -16,6 +16,7 @@ package = true
 dev = [
     "mypy>=1.17.0",
     "pytest>=8.4.1",
+    "watchdog",
 ]
 
 [tool.ruff]
