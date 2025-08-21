@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Daily Photo</title>
+  <link rel="self" href="https://daily.photo"/>
+  <updated>{{ date }}</updated>
+  <author>
+    <name>Jake Kaufman</name>
+    <email>me@jake.computer</email>
+  </author>
+  <id>https://daily.photo/</id>
+{% for entry in entries %}
+  <entry>
+    <title>{{ entry.title }}</title>
+    <link href="{{ entry.link }}"/>
+    <id>{{ entry.link }}</id>
+    <summary type="xhtml">
+      <div xmlns="http://www.w3.org/1999/xhtml">
+        <div><img src="{{ entry.img_link }}" title="{{ entry.alt }}" alt="{{ entry.alt }}" /></div>
+        <p>"{{ entry.subtitle }}"</p>
+      </div>
+    </summary>
+    <updated>{{ entry.date }}</updated>
+  </entry>
+{% endfor %}
+</feed>

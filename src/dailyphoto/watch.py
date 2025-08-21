@@ -1,10 +1,10 @@
-import time
 import logging
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEvent
-from watchdog.events import FileSystemEventHandler
+import time
 
 from dailyphoto.types import Config
+from watchdog.events import FileSystemEvent
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 from .generate import generate
 

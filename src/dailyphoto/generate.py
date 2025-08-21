@@ -1,14 +1,14 @@
 import datetime
-import html
-import importlib.resources
 import logging
 import os
 import shutil
-import string
 import sys
 import tarfile
-from typing import TypedDict
 
+from jinja2 import Environment
+from jinja2 import PackageLoader
+from jinja2 import select_autoescape
+from pydantic import BaseModel
 
 from .config import Config
 from .config import IMAGES
@@ -17,47 +17,15 @@ from .config import OUTPUT_DIR
 from .config import OUTPUT_IMAGES
 from .metadata import get_metadata_filename
 from .metadata import read_metadata
-from . import resources
 
 logger = logging.getLogger(__name__)
-
-RSS_FEED_HEADER = """\
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-  <title>Daily Photo</title>
-  <link rel="self" href="https://daily.photo"/>
-  <updated>{date}</updated>
-  <author>
-    <name>Jake Kaufman</name>
-    <email>me@jake.computer</email>
-  </author>
-  <id>https://daily.photo/</id>
-"""
-
-RSS_FEED_ENTRY = """
-  <entry>
-    <title>{title}</title>
-    <link href="{link}"/>
-    <id>{link}</id>
-    <summary type="xhtml">
-      <div xmlns="http://www.w3.org/1999/xhtml">
-        <div><img src="{img_link}" title="{alt}" alt="{alt}" /></div>
-        <p>"{subtitle}"</p>
-      </div>
-    </summary>
-    <updated>{date}</updated>
-  </entry>
-"""
-
-RSS_FEED_TRAILER = "\n</feed>\n"
 
 
 def format_filename(output_dir: str, day: datetime.datetime) -> str:
     return os.path.join(output_dir, f"{day.strftime('%Y%m%d')}.html")
 
 
-# TODO convert to pydantic and align template with existing types
-class TemplateSubstitutions(TypedDict):
+class DailyTemplate(BaseModel):
     yesterday: str
     tomorrow: str
     image: str
@@ -69,19 +37,27 @@ class TemplateSubstitutions(TypedDict):
     film: str
 
 
-def get_resource(filename: str) -> str:
-    return importlib.resources.read_text(resources, filename)
+class RSSEntry(BaseModel):
+    title: str
+    link: str
+    img_link: str
+    alt: str
+    subtitle: str
+    date: str
+
+
+class RSSFeed(BaseModel):
+    date: str
+    entries: list[RSSEntry]
 
 
 def generate_html(
-    data: TemplateSubstitutions,
+    env: Environment,
+    data: DailyTemplate,
     output_filename: str,
 ) -> None:
-    tmpl = get_resource("template.html")
-    daily_template = string.Template(tmpl)
-
     # TODO check that this fully substituted or use better templating
-    html_content = daily_template.substitute(data)
+    html_content = env.get_template("template.html").render(data)
 
     with open(output_filename, "w") as f:
         f.write(html_content)
@@ -98,12 +74,9 @@ def rss_date(date: datetime.datetime) -> str:
     return date.isoformat() + "Z"
 
 
-def is_final_day(conf: Config, day: datetime.datetime) -> bool:
-    return day == conf.dates[-1].day
-
-
 def generate_day(
     *,
+    env: Environment,
     conf: Config,
     prev_day: datetime.datetime,
     current_day: datetime.datetime,
@@ -112,7 +85,8 @@ def generate_day(
     metadata_file: str,
     index: bool,
     output_dir: str,
-) -> str:
+    rss_feed: RSSFeed,
+) -> None:
     if index:
         output_name = os.path.join(output_dir, "index.html")
     else:
@@ -137,39 +111,42 @@ def generate_day(
         os.symlink(intput_image, output_image)
 
     tomorrow = format_filename("/", next_day)
-    if is_final_day(conf, next_day):
+    if next_day == conf.dates[-1].day:
         tomorrow = "index.html"
 
     generate_html(
-        {
-            "yesterday": format_filename("/", prev_day),
-            "tomorrow": tomorrow,
-            "image": os.path.join(OUTPUT_IMAGES, image),
-            "alt": metadata.alt,
-            "subtitle": metadata.subtitle,
-            "date": current_day.strftime("%B %d, %Y"),
-            "shot_date": photo_date(metadata.date),
-            "camera": metadata.camera,
-            "film": metadata.film,
-        },
+        env,
+        DailyTemplate(
+            yesterday=format_filename("/", prev_day),
+            tomorrow=tomorrow,
+            image=os.path.join(OUTPUT_IMAGES, image),
+            alt=metadata.alt,
+            subtitle=metadata.subtitle,
+            date=photo_date(current_day),
+            shot_date=photo_date(metadata.date),
+            camera=metadata.camera,
+            film=metadata.film,
+        ),
         output_name,
     )
 
     if index:
         # index isn't included in the RSS feed
-        return ""
+        return
 
-    return RSS_FEED_ENTRY.format(
-        title=metadata.subtitle,
-        link=f"https://daily.photo/{current_day.strftime('%Y%m%d')}.html",
-        date=rss_date(current_day),
-        alt=html.escape(metadata.alt),
-        img_link=f"https://daily.photo/{OUTPUT_IMAGES}/{image}",
-        subtitle=html.escape(metadata.subtitle),
+    rss_feed.entries.append(
+        RSSEntry(
+            title=metadata.subtitle,
+            link=f"https://daily.photo/{current_day.strftime('%Y%m%d')}.html",
+            date=rss_date(current_day),
+            alt=metadata.alt,
+            img_link=f"https://daily.photo/{OUTPUT_IMAGES}/{image}",
+            subtitle=metadata.subtitle,
+        ),
     )
 
 
-def setup_output_dir(output_dir: str) -> bool:
+def setup_output_dir(env: Environment, output_dir: str) -> bool:
     """
     Creates the output dir and links base files like CSS
     """
@@ -188,12 +165,12 @@ def setup_output_dir(output_dir: str) -> bool:
     main_css = f"{output_dir}/main.css"
     with open(main_css, "w") as f:
         logger.info(f"Creating {main_css}")
-        f.write(get_resource("main.css"))
+        f.write(env.get_template("main.css").render())
 
     main_js = f"{output_dir}/main.js"
     with open(main_js, "w") as f:
         logger.info(f"Creating {main_js}")
-        f.write(get_resource("main.js"))
+        f.write(env.get_template("main.js").render())
 
     return True
 
@@ -226,13 +203,13 @@ def create_tar_gz_with_symlinks(source_dir: str, output_filename: str) -> None:
 
 
 def generate(*, conf: Config, tar: bool) -> int:
+    env = Environment(loader=PackageLoader("dailyphoto", "resources"), autoescape=select_autoescape(["html", "xml"]))
+
     logger.info("Generating site")
-    if not setup_output_dir(OUTPUT_DIR):
+    if not setup_output_dir(env, OUTPUT_DIR):
         return 1
 
-    rss_feed = RSS_FEED_HEADER.format(
-        date=rss_date(datetime.datetime.now()),
-    )
+    rss_feed = RSSFeed(date=rss_date(datetime.datetime.now()), entries=[])
 
     dates = conf.dates
     for i, date in enumerate(dates):
@@ -256,6 +233,7 @@ def generate(*, conf: Config, tar: bool) -> int:
         if i == len(dates) - 1:
             # Last day we need to generate the index and no anchor
             generate_day(
+                env=env,
                 conf=conf,
                 prev_day=prev_day,
                 current_day=today,
@@ -264,9 +242,11 @@ def generate(*, conf: Config, tar: bool) -> int:
                 index=True,
                 metadata_file=metadata_file,
                 output_dir=OUTPUT_DIR,
+                rss_feed=rss_feed,
             )
 
-        rss_feed += generate_day(
+        generate_day(
+            env=env,
             conf=conf,
             prev_day=prev_day,
             current_day=today,
@@ -275,13 +255,13 @@ def generate(*, conf: Config, tar: bool) -> int:
             index=False,
             metadata_file=metadata_file,
             output_dir=OUTPUT_DIR,
+            rss_feed=rss_feed,
         )
 
-    rss_feed += RSS_FEED_TRAILER
     rss_file = os.path.join(OUTPUT_DIR, "rss.xml")
     logger.info(f"Writing {rss_file}")
     with open(rss_file, "w") as rss:
-        rss.write(rss_feed)
+        rss.write(env.get_template("rss.xml").render(rss_feed))
 
     if tar:
         create_tar_gz_with_symlinks(OUTPUT_DIR, "dailyphoto.tar.gz")
