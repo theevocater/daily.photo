@@ -8,9 +8,9 @@
     <meta name="twitter:site" content="@theevocater" />
     <meta name="twitter:creator" content="@theevocater" />
 
-      <meta property="og:title" content="{{ subtitle }}" />
-      <meta property="og:image:alt" content="{{ alt }}" />
-      <meta property="og:image" content="https://daily.photo/{{ image }}" />
+    <meta property="og:title" content="{{ subtitle }}" />
+    <meta property="og:image:alt" content="{{ alt }}" />
+    <meta property="og:image" content="https://daily.photo/{{ image }}" />
     <meta property="og:image:type" content="image/jpeg" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,31 +21,31 @@
   </head>
   <body>
     <header>
-        <h1>{{ date }}</h1>
+      <h1>{{ date }}</h1>
     </header>
     <main>
-        <a class="arrow arrow-left" href="{{ yesterday }}"><div>&lt;</div></a>
+      <a class="arrow arrow-left" href="{{ yesterday }}"><div>&lt;</div></a>
       <div id="center">
-          <div id="img"><img src="{{ image }}" alt="{{ alt }}" title="{{ alt }}"></div>
+        <div id="img"><img src="{{ image }}" alt="{{ alt }}" title="{{ alt }}"></div>
         <div id="alt">
-            <h2>{{ subtitle }}</h2>
+          <h2>{{ subtitle }}</h2>
         </div>
         <div id="metadata">
           <div>
             <div class="meta_header">Taken</div>
-              <div>{{ shot_date }}</div>
+            <div>{{ shot_date }}</div>
           </div>
           <div>
             <div class="meta_header">Film</div>
-              <div>{{ film }}</div>
+            <div>{{ film }}</div>
           </div>
           <div>
             <div class="meta_header">Camera</div>
-              <div>{{ camera }}</div>
+            <div>{{ camera }}</div>
           </div>
         </div>
       </div>
-        <a class="arrow arrow-right" href="{{ tomorrow }}"><div>&gt;</div></a>
+      <a class="arrow arrow-right" href="{{ tomorrow }}"><div>&gt;</div></a>
     </main>
     <footer>
       <p>Find me at <a href="https://jake.computer">jake.computer</a>. <a href="/rss.xml">RSS</a></p>
