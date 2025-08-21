@@ -1,14 +1,13 @@
 import datetime
 import html
-import importlib.resources
 import logging
 import os
 import shutil
-import string
 import sys
 import tarfile
 from typing import TypedDict
 
+from jinja2 import Environment, PackageLoader, Template, select_autoescape
 
 from .config import Config
 from .config import IMAGES
@@ -17,7 +16,6 @@ from .config import OUTPUT_DIR
 from .config import OUTPUT_IMAGES
 from .metadata import get_metadata_filename
 from .metadata import read_metadata
-from . import resources
 
 logger = logging.getLogger(__name__)
 
@@ -69,19 +67,19 @@ class TemplateSubstitutions(TypedDict):
     film: str
 
 
-def get_resource(filename: str) -> str:
-    return importlib.resources.read_text(resources, filename)
+env = Environment(loader=PackageLoader("dailyphoto", "resources"), autoescape=select_autoescape(["html", "xml"]))
+
+
+def get_resource(filename: str) -> Template:
+    return env.get_template(filename)
 
 
 def generate_html(
     data: TemplateSubstitutions,
     output_filename: str,
 ) -> None:
-    tmpl = get_resource("template.html")
-    daily_template = string.Template(tmpl)
-
     # TODO check that this fully substituted or use better templating
-    html_content = daily_template.substitute(data)
+    html_content = get_resource("template.html").render(data)
 
     with open(output_filename, "w") as f:
         f.write(html_content)
@@ -188,12 +186,12 @@ def setup_output_dir(output_dir: str) -> bool:
     main_css = f"{output_dir}/main.css"
     with open(main_css, "w") as f:
         logger.info(f"Creating {main_css}")
-        f.write(get_resource("main.css"))
+        f.write(get_resource("main.css").render())
 
     main_js = f"{output_dir}/main.js"
     with open(main_js, "w") as f:
         logger.info(f"Creating {main_js}")
-        f.write(get_resource("main.js"))
+        f.write(get_resource("main.js").render())
 
     return True
 

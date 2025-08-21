@@ -4,7 +4,11 @@ version = "0.1.0"
 description = "Tool to create https://daily.photo"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ['Pillow', 'pydantic']
+dependencies = [
+  "jinja2",
+  "Pillow",
+  "pydantic",
+]
 
 [project.scripts]
 dailyphoto = "dailyphoto:cli.main"
@@ -14,9 +18,9 @@ package = true
 
 [dependency-groups]
 dev = [
-    "mypy",
-    "pytest",
-    "watchdog",
+  "mypy",
+  "pytest",
+  "watchdog",
 ]
 
 [tool.ruff]
