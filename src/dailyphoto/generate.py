@@ -8,7 +8,6 @@ import tarfile
 from jinja2 import Environment
 from jinja2 import PackageLoader
 from jinja2 import select_autoescape
-from jinja2 import Template
 from pydantic import BaseModel
 
 from .config import Config
@@ -55,16 +54,12 @@ class RSSFeed(BaseModel):
 env = Environment(loader=PackageLoader("dailyphoto", "resources"), autoescape=select_autoescape(["html", "xml"]))
 
 
-def get_resource(filename: str) -> Template:
-    return env.get_template(filename)
-
-
 def generate_html(
     data: DailyTemplate,
     output_filename: str,
 ) -> None:
     # TODO check that this fully substituted or use better templating
-    html_content = get_resource("template.html").render(data)
+    html_content = env.get_template("template.html").render(data)
 
     with open(output_filename, "w") as f:
         f.write(html_content)
@@ -170,12 +165,12 @@ def setup_output_dir(output_dir: str) -> bool:
     main_css = f"{output_dir}/main.css"
     with open(main_css, "w") as f:
         logger.info(f"Creating {main_css}")
-        f.write(get_resource("main.css").render())
+        f.write(env.get_template("main.css").render())
 
     main_js = f"{output_dir}/main.js"
     with open(main_js, "w") as f:
         logger.info(f"Creating {main_js}")
-        f.write(get_resource("main.js").render())
+        f.write(env.get_template("main.js").render())
 
     return True
 
@@ -262,7 +257,7 @@ def generate(*, conf: Config, tar: bool) -> int:
     rss_file = os.path.join(OUTPUT_DIR, "rss.xml")
     logger.info(f"Writing {rss_file}")
     with open(rss_file, "w") as rss:
-        rss.write(get_resource("rss.xml").render(rss_feed))
+        rss.write(env.get_template("rss.xml").render(rss_feed))
 
     if tar:
         create_tar_gz_with_symlinks(OUTPUT_DIR, "dailyphoto.tar.gz")
