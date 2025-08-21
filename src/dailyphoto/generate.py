@@ -51,10 +51,8 @@ class RSSFeed(BaseModel):
     entries: list[RSSEntry]
 
 
-env = Environment(loader=PackageLoader("dailyphoto", "resources"), autoescape=select_autoescape(["html", "xml"]))
-
-
 def generate_html(
+    env: Environment,
     data: DailyTemplate,
     output_filename: str,
 ) -> None:
@@ -78,6 +76,7 @@ def rss_date(date: datetime.datetime) -> str:
 
 def generate_day(
     *,
+    env: Environment,
     conf: Config,
     prev_day: datetime.datetime,
     current_day: datetime.datetime,
@@ -116,6 +115,7 @@ def generate_day(
         tomorrow = "index.html"
 
     generate_html(
+        env,
         DailyTemplate(
             yesterday=format_filename("/", prev_day),
             tomorrow=tomorrow,
@@ -146,7 +146,7 @@ def generate_day(
     )
 
 
-def setup_output_dir(output_dir: str) -> bool:
+def setup_output_dir(env: Environment, output_dir: str) -> bool:
     """
     Creates the output dir and links base files like CSS
     """
@@ -203,8 +203,10 @@ def create_tar_gz_with_symlinks(source_dir: str, output_filename: str) -> None:
 
 
 def generate(*, conf: Config, tar: bool) -> int:
+    env = Environment(loader=PackageLoader("dailyphoto", "resources"), autoescape=select_autoescape(["html", "xml"]))
+
     logger.info("Generating site")
-    if not setup_output_dir(OUTPUT_DIR):
+    if not setup_output_dir(env, OUTPUT_DIR):
         return 1
 
     rss_feed = RSSFeed(date=rss_date(datetime.datetime.now()), entries=[])
@@ -231,6 +233,7 @@ def generate(*, conf: Config, tar: bool) -> int:
         if i == len(dates) - 1:
             # Last day we need to generate the index and no anchor
             generate_day(
+                env=env,
                 conf=conf,
                 prev_day=prev_day,
                 current_day=today,
@@ -243,6 +246,7 @@ def generate(*, conf: Config, tar: bool) -> int:
             )
 
         generate_day(
+            env=env,
             conf=conf,
             prev_day=prev_day,
             current_day=today,
