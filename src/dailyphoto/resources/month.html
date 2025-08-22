@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <!-- <link rel="stylesheet" href="main.css"> -->
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@theevocater" />
+    <meta name="twitter:creator" content="@theevocater" />
+
+    <meta property="og:title" content="{{ subtitle }}" />
+    <meta property="og:image:alt" content="{{ alt }}" />
+    <meta property="og:image" content="https://daily.photo/{{ image }}" />
+    <meta property="og:image:type" content="image/jpeg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="main.js"></script>
+    <title>Daily Photos for {{ month }} </title>
+  </head>
+  <body>
+    <header>
+      <h1>{{ month }}</h1>
+    </header>
+    <main>
+{% for image in images %}
+      <div>
+        <a href="{{ image.link }}">
+          <img src="{{ image.file }}" alt="{{ image.alt }}" title="{{ image.alt }}">
+        </a>
+      </div>
+{% endfor %}
+    </main>
+    <footer>
+      <p>Find me at <a href="https://jake.computer">jake.computer</a>. <a href="/rss.xml">RSS</a></p>
+    </footer>
+  </body>
+</html>

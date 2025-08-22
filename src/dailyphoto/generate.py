@@ -37,6 +37,17 @@ class DailyTemplate(BaseModel):
     film: str
 
 
+class MonthlyImage(BaseModel):
+    link: str
+    file: str
+    alt: str
+
+
+class MonthlyTemplate(BaseModel):
+    month: str
+    images: list[MonthlyImage]
+
+
 class RSSEntry(BaseModel):
     title: str
     link: str
@@ -86,6 +97,7 @@ def generate_day(
     index: bool,
     output_dir: str,
     rss_feed: RSSFeed,
+    month: MonthlyTemplate,
 ) -> None:
     if index:
         output_name = os.path.join(output_dir, "index.html")
@@ -133,6 +145,14 @@ def generate_day(
     if index:
         # index isn't included in the RSS feed
         return
+
+    month.images.append(
+        MonthlyImage(
+            link=format_filename("/", current_day),
+            file=os.path.join(OUTPUT_IMAGES, image),
+            alt=metadata.alt,
+        ),
+    )
 
     rss_feed.entries.append(
         RSSEntry(
@@ -212,8 +232,17 @@ def generate(*, conf: Config, tar: bool) -> int:
     rss_feed = RSSFeed(date=rss_date(datetime.datetime.now()), entries=[])
 
     dates = conf.dates
+    month = MonthlyTemplate(month=dates[0].day.strftime("%B-%Y"), images=[])
     for i, date in enumerate(dates):
         today = date.day
+        # New month, write and reset
+        if date.day.strftime("%B-%Y") != month.month:
+            monthly_file = os.path.join(OUTPUT_DIR, f"{month.month}.html")
+            logger.info(f"Writing {monthly_file}")
+            with open(monthly_file, "w") as rss:
+                rss.write(env.get_template("month.html").render(month))
+            month = MonthlyTemplate(month=today.strftime("%B-%Y"), images=[])
+
         metadata_file = get_metadata_filename(
             METADATA_DIR,
             date.filename,
@@ -243,6 +272,7 @@ def generate(*, conf: Config, tar: bool) -> int:
                 metadata_file=metadata_file,
                 output_dir=OUTPUT_DIR,
                 rss_feed=rss_feed,
+                month=month,
             )
 
         generate_day(
@@ -256,7 +286,13 @@ def generate(*, conf: Config, tar: bool) -> int:
             metadata_file=metadata_file,
             output_dir=OUTPUT_DIR,
             rss_feed=rss_feed,
+            month=month,
         )
+
+    monthly_file = os.path.join(OUTPUT_DIR, f"{month.month}.html")
+    logger.info(f"Writing {monthly_file}")
+    with open(monthly_file, "w") as rss:
+        rss.write(env.get_template("month.html").render(month))
 
     rss_file = os.path.join(OUTPUT_DIR, "rss.xml")
     logger.info(f"Writing {rss_file}")
