@@ -25,3 +25,30 @@ dev = [
 
 [tool.ruff]
 line-length = 120
+
+[tool.ruff.lint]
+select = [
+# pycodestyle
+  "E",
+# Pyflakes
+  "F",
+# pyupgrade
+  "UP",
+# flake8-bugbear
+  "B",
+# flake8-logging
+  "LOG",
+# flake8-simplify
+  "SIM",
+# flake8-unused-arguments
+  "ARG",
+# isort
+  "I",
+]
+ignore = [
+# if-else-block-instead-of-if-exp, I prefer if-else
+  "SIM108",
+]
+
+[tool.ruff.lint.isort]
+force-single-line = true

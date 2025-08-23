@@ -1,13 +1,12 @@
 import logging
 import time
 
-from dailyphoto.types import Config
 from watchdog.events import FileSystemEvent
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 from .generate import generate
-
+from .types import Config
 
 logger = logging.getLogger(__name__)
 

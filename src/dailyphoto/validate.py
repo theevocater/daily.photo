@@ -1,9 +1,9 @@
 import logging
 import os
 
-from .config import Config
 from .config import IMAGES
 from .config import METADATA_DIR
+from .config import Config
 from .metadata import get_metadata_filename
 from .metadata import read_metadata
 
