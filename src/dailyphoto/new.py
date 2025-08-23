@@ -72,7 +72,7 @@ def new(
 
     dates += [(last_day + timedelta(days=(i + 1))).strftime("%Y%m%d") for i in range(0, max_days - len(dates))]
 
-    for date, image in zip(dates, images):
+    for date, image in zip(dates, images, strict=True):
         new_image(
             new_date=date,
             new_image=image,

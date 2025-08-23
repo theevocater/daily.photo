@@ -2,10 +2,10 @@ import logging
 import os
 import shutil
 
-from .config import Config
 from .config import UNUSED
 from .config import UNUSED_IMAGES
 from .config import UNUSED_METADATA
+from .config import Config
 
 logger = logging.getLogger(__name__)
 

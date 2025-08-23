@@ -6,20 +6,20 @@ import sys
 import tarfile
 from typing import Annotated
 
-from dailyphoto.types import Metadata
 from jinja2 import Environment
 from jinja2 import PackageLoader
 from jinja2 import select_autoescape
 from pydantic import BaseModel
 from pydantic import PlainSerializer
 
-from .config import Config
 from .config import IMAGES
 from .config import METADATA_DIR
 from .config import OUTPUT_DIR
 from .config import OUTPUT_IMAGES
+from .config import Config
 from .metadata import get_metadata_filename
 from .metadata import read_metadata
+from .types import Metadata
 
 logger = logging.getLogger(__name__)
 

@@ -2,8 +2,8 @@ import logging
 from datetime import datetime
 
 from PIL import Image
-from PIL.ExifTags import Base
 from PIL.ExifTags import TAGS
+from PIL.ExifTags import Base
 
 from .types import MetadataEditable
 
@@ -47,8 +47,5 @@ def exif_to_metadata(image_file: str, metadata: MetadataEditable) -> None:
     if make and model and metadata.camera == "":
         metadata.camera = f"{make} {model}"
     # Always trust the camera for digital cameras
-    if exif_date and make == "FUJIFILM":
-        metadata.date = exif_date
-    # seed the date if we don't have one at all
-    elif exif_date and not metadata.date:
+    if exif_date and make == "FUJIFILM" or exif_date and not metadata.date:
         metadata.date = exif_date
