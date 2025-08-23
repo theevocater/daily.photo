@@ -35,6 +35,11 @@ class DailyTemplate(BaseModel):
     image: str
     metadata: Metadata
 
+    def write(self, env: Environment, output_name: str) -> None:
+        html_content = env.get_template("template.html").render(self)
+        with open(output_name, "w") as f:
+            f.write(html_content)
+
 
 class MonthlyImage(BaseModel):
     link: str
@@ -52,7 +57,13 @@ class MonthlyTemplate(BaseModel):
     month: datetime.datetime
     prev: Annotated[datetime.datetime | None, PlainSerializer(monthly_filename)] = None
     next: Annotated[datetime.datetime | None, PlainSerializer(monthly_filename)] = None
-    images: list[MonthlyImage]
+    images: list[MonthlyImage] = []
+
+    def write(self, env: Environment) -> None:
+        monthly_file = os.path.join(OUTPUT_DIR, monthly_filename(self.month))
+        logger.info(f"Writing {monthly_file}")
+        with open(monthly_file, "w") as f:
+            f.write(env.get_template("month.html").render(self.model_dump()))
 
 
 def rss_date(date: datetime.datetime) -> str:
@@ -74,6 +85,12 @@ class RSSEntry(BaseModel):
 class RSSFeed(BaseModel):
     date: Annotated[datetime.datetime, PlainSerializer(rss_date)]
     entries: list[RSSEntry]
+
+    def write(self, env: Environment) -> None:
+        rss_file = os.path.join(OUTPUT_DIR, "rss.xml")
+        logger.info(f"Writing {rss_file}")
+        with open(rss_file, "w") as rss:
+            rss.write(env.get_template("rss.xml").render(self.model_dump()))
 
 
 def photo_date(date: datetime.datetime) -> str:
@@ -99,7 +116,7 @@ def generate_day(
     else:
         output_name = format_filename(output_dir, current_day)
 
-    logger.info(f"Generating {output_name}")
+    logger.info(f"Writing {output_name}")
 
     metadata = read_metadata(metadata_file)
     if metadata is None:
@@ -121,17 +138,13 @@ def generate_day(
     if next_day == conf.dates[-1].day:
         tomorrow = "index.html"
 
-    html_content = env.get_template("template.html").render(
-        DailyTemplate(
-            date=current_day,
-            yesterday=format_filename("/", prev_day),
-            tomorrow=tomorrow,
-            image=os.path.join(OUTPUT_IMAGES, image),
-            metadata=metadata,
-        ),
-    )
-    with open(output_name, "w") as f:
-        f.write(html_content)
+    DailyTemplate(
+        date=current_day,
+        yesterday=format_filename("/", prev_day),
+        tomorrow=tomorrow,
+        image=os.path.join(OUTPUT_IMAGES, image),
+        metadata=metadata,
+    ).write(env, output_name)
 
     if index:
         # index isn't included in the RSS feed
@@ -225,18 +238,15 @@ def generate(*, conf: Config, tar: bool) -> int:
     rss_feed = RSSFeed(date=datetime.datetime.now(), entries=[])
 
     dates = conf.dates
-    month = MonthlyTemplate(month=dates[0].day, images=[])
+    month = MonthlyTemplate(month=dates[0].day)
     for i, date in enumerate(dates):
         today = date.day
         curr_month = datetime.datetime(year=today.year, month=today.month, day=1)
         if curr_month != month.month:
             # New month, write and reset
             month.next = curr_month
-            monthly_file = os.path.join(OUTPUT_DIR, monthly_filename(month.month))
-            logger.info(f"Writing {monthly_file}")
-            with open(monthly_file, "w") as rss:
-                rss.write(env.get_template("month.html").render(month.model_dump()))
-            month = MonthlyTemplate(month=today, prev=month.month, images=[])
+            month.write(env)
+            month = MonthlyTemplate(month=curr_month, prev=month.month)
 
         metadata_file = get_metadata_filename(
             METADATA_DIR,
@@ -284,15 +294,10 @@ def generate(*, conf: Config, tar: bool) -> int:
             month=month,
         )
 
-    monthly_file = monthly_filename(month.month)
-    logger.info(f"Writing {monthly_file}")
-    with open(monthly_file, "w") as rss:
-        rss.write(env.get_template("month.html").render(month.model_dump()))
+    # Write out the final month
+    month.write(env)
 
-    rss_file = os.path.join(OUTPUT_DIR, "rss.xml")
-    logger.info(f"Writing {rss_file}")
-    with open(rss_file, "w") as rss:
-        rss.write(env.get_template("rss.xml").render(rss_feed.model_dump()))
+    rss_feed.write(env)
 
     if tar:
         create_tar_gz_with_symlinks(OUTPUT_DIR, "dailyphoto.tar.gz")
