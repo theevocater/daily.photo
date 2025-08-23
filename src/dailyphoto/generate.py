@@ -4,11 +4,14 @@ import os
 import shutil
 import sys
 import tarfile
+from typing import Annotated
 
+from dailyphoto.types import Metadata
 from jinja2 import Environment
 from jinja2 import PackageLoader
 from jinja2 import select_autoescape
 from pydantic import BaseModel
+from pydantic import PlainSerializer
 
 from .config import Config
 from .config import IMAGES
@@ -26,15 +29,11 @@ def format_filename(output_dir: str, day: datetime.datetime) -> str:
 
 
 class DailyTemplate(BaseModel):
+    date: datetime.datetime
     yesterday: str
     tomorrow: str
     image: str
-    alt: str
-    subtitle: str
-    date: str
-    shot_date: str
-    camera: str
-    film: str
+    metadata: Metadata
 
 
 class MonthlyImage(BaseModel):
@@ -43,9 +42,24 @@ class MonthlyImage(BaseModel):
     alt: str
 
 
+def monthly_filename(month: datetime.datetime | None) -> str:
+    if month is None:
+        return ""
+    return f"{month.year}-{month.month}.html"
+
+
 class MonthlyTemplate(BaseModel):
-    month: str
+    month: datetime.datetime
+    prev: Annotated[datetime.datetime | None, PlainSerializer(monthly_filename)] = None
+    next: Annotated[datetime.datetime | None, PlainSerializer(monthly_filename)] = None
     images: list[MonthlyImage]
+
+
+def rss_date(date: datetime.datetime) -> str:
+    """
+    Return a ISO3601 UTC date without external library
+    """
+    return date.isoformat() + "Z"
 
 
 class RSSEntry(BaseModel):
@@ -58,31 +72,12 @@ class RSSEntry(BaseModel):
 
 
 class RSSFeed(BaseModel):
-    date: str
+    date: Annotated[datetime.datetime, PlainSerializer(rss_date)]
     entries: list[RSSEntry]
-
-
-def generate_html(
-    env: Environment,
-    data: DailyTemplate,
-    output_filename: str,
-) -> None:
-    # TODO check that this fully substituted or use better templating
-    html_content = env.get_template("template.html").render(data)
-
-    with open(output_filename, "w") as f:
-        f.write(html_content)
 
 
 def photo_date(date: datetime.datetime) -> str:
     return date.strftime("%B %d, %Y")
-
-
-def rss_date(date: datetime.datetime) -> str:
-    """
-    Return a ISO3601 UTC date without external library
-    """
-    return date.isoformat() + "Z"
 
 
 def generate_day(
@@ -126,21 +121,17 @@ def generate_day(
     if next_day == conf.dates[-1].day:
         tomorrow = "index.html"
 
-    generate_html(
-        env,
+    html_content = env.get_template("template.html").render(
         DailyTemplate(
+            date=current_day,
             yesterday=format_filename("/", prev_day),
             tomorrow=tomorrow,
             image=os.path.join(OUTPUT_IMAGES, image),
-            alt=metadata.alt,
-            subtitle=metadata.subtitle,
-            date=photo_date(current_day),
-            shot_date=photo_date(metadata.date),
-            camera=metadata.camera,
-            film=metadata.film,
+            metadata=metadata,
         ),
-        output_name,
     )
+    with open(output_name, "w") as f:
+        f.write(html_content)
 
     if index:
         # index isn't included in the RSS feed
@@ -182,15 +173,17 @@ def setup_output_dir(env: Environment, output_dir: str) -> bool:
         logger.info(f"Creating {images}")
         os.mkdir(images)
 
-    main_css = f"{output_dir}/main.css"
-    with open(main_css, "w") as f:
-        logger.info(f"Creating {main_css}")
-        f.write(env.get_template("main.css").render())
+    untemplated_files = [
+        "main.css",
+        "main.js",
+        "month.css",
+    ]
 
-    main_js = f"{output_dir}/main.js"
-    with open(main_js, "w") as f:
-        logger.info(f"Creating {main_js}")
-        f.write(env.get_template("main.js").render())
+    for file in untemplated_files:
+        filename = f"{output_dir}/{file}"
+        with open(filename, "w") as f:
+            logger.info(f"Creating {filename}")
+            f.write(env.get_template(file).render())
 
     return True
 
@@ -229,19 +222,21 @@ def generate(*, conf: Config, tar: bool) -> int:
     if not setup_output_dir(env, OUTPUT_DIR):
         return 1
 
-    rss_feed = RSSFeed(date=rss_date(datetime.datetime.now()), entries=[])
+    rss_feed = RSSFeed(date=datetime.datetime.now(), entries=[])
 
     dates = conf.dates
-    month = MonthlyTemplate(month=dates[0].day.strftime("%B-%Y"), images=[])
+    month = MonthlyTemplate(month=dates[0].day, images=[])
     for i, date in enumerate(dates):
         today = date.day
-        # New month, write and reset
-        if date.day.strftime("%B-%Y") != month.month:
-            monthly_file = os.path.join(OUTPUT_DIR, f"{month.month}.html")
+        curr_month = datetime.datetime(year=today.year, month=today.month, day=1)
+        if curr_month != month.month:
+            # New month, write and reset
+            month.next = curr_month
+            monthly_file = os.path.join(OUTPUT_DIR, monthly_filename(month.month))
             logger.info(f"Writing {monthly_file}")
             with open(monthly_file, "w") as rss:
-                rss.write(env.get_template("month.html").render(month))
-            month = MonthlyTemplate(month=today.strftime("%B-%Y"), images=[])
+                rss.write(env.get_template("month.html").render(month.model_dump()))
+            month = MonthlyTemplate(month=today, prev=month.month, images=[])
 
         metadata_file = get_metadata_filename(
             METADATA_DIR,
@@ -289,15 +284,15 @@ def generate(*, conf: Config, tar: bool) -> int:
             month=month,
         )
 
-    monthly_file = os.path.join(OUTPUT_DIR, f"{month.month}.html")
+    monthly_file = monthly_filename(month.month)
     logger.info(f"Writing {monthly_file}")
     with open(monthly_file, "w") as rss:
-        rss.write(env.get_template("month.html").render(month))
+        rss.write(env.get_template("month.html").render(month.model_dump()))
 
     rss_file = os.path.join(OUTPUT_DIR, "rss.xml")
     logger.info(f"Writing {rss_file}")
     with open(rss_file, "w") as rss:
-        rss.write(env.get_template("rss.xml").render(rss_feed))
+        rss.write(env.get_template("rss.xml").render(rss_feed.model_dump()))
 
     if tar:
         create_tar_gz_with_symlinks(OUTPUT_DIR, "dailyphoto.tar.gz")
