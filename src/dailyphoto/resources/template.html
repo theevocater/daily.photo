@@ -17,31 +17,33 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <script src="main.js"></script>
-    <title>Daily Photo</title>
+    <title>Daily Photo for {{ date.strftime("%B %d, %Y") }} </title>
   </head>
   <body>
     <header>
-      <h1>{{ date }}</h1>
+      <h1>
+        <a href="{{ date.year }}-{{date.month}}.html">{{ date.strftime("%B") }}</a> {{ date.strftime("%d, %Y") }}
+      </h1>
     </header>
     <main>
       <a class="arrow arrow-left" href="{{ yesterday }}"><div>&lt;</div></a>
       <div id="center">
-        <div id="img"><img src="{{ image }}" alt="{{ alt }}" title="{{ alt }}"></div>
+        <div id="img"><img src="{{ image }}" alt="{{ metadata.alt }}" title="{{ metadata.alt }}"></div>
         <div id="alt">
-          <h2>{{ subtitle }}</h2>
+          <h2>{{ metadata.subtitle }}</h2>
         </div>
         <div id="metadata">
           <div>
             <div class="meta_header">Taken</div>
-            <div>{{ shot_date }}</div>
+            <div>{{ metadata.date.strftime("%B %d, %Y") }}</div>
           </div>
           <div>
             <div class="meta_header">Film</div>
-            <div>{{ film }}</div>
+            <div>{{ metadata.film }}</div>
           </div>
           <div>
             <div class="meta_header">Camera</div>
-            <div>{{ camera }}</div>
+            <div>{{ metadata.camera }}</div>
           </div>
         </div>
       </div>

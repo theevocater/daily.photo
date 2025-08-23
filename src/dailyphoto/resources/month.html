@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="month.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="main.js"></script>
+    <title>Daily Photos for {{ month.strftime("%B, %Y") }} </title>
+  </head>
+  <body>
+    <header>
+      <a class="arrow arrow-left" href="{{ prev }}"><div>&lt;</div></a>
+      <h1>{{ month.strftime("%B, %Y") }}</h1>
+      <a class="arrow arrow-right" href="{{ next }}"><div>&gt;</div></a>
+    </header>
+    <main class="flex-container">
+{% for image in images %}
+      <div class="flex-item">
+        <a href="{{ image.link }}">
+          <img src="{{ image.file }}" alt="{{ image.alt }}" title="{{ image.alt }}">
+        </a>
+      </div>
+{% endfor %}
+    </main>
+    <footer>
+      <p>Find me at <a href="https://jake.computer">jake.computer</a>. <a href="/rss.xml">RSS</a></p>
+    </footer>
+  </body>
+</html>
