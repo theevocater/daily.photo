@@ -16,9 +16,9 @@
       <h1>{{ month.strftime("%B, %Y") }}</h1>
       <a class="arrow arrow-right" href="{{ next }}"><div>&gt;</div></a>
     </header>
-    <main class="flex-container">
+    <main class="grid-container">
 {% for image in images %}
-      <div class="flex-item">
+      <div class="grid-item">
         <a href="{{ image.link }}">
           <img src="{{ image.file }}" alt="{{ image.alt }}" title="{{ image.alt }}">
         </a>
