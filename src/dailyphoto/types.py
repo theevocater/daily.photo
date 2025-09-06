@@ -16,7 +16,7 @@ ShortDatetime = Annotated[
 
 class Date(BaseModel):
     day: ShortDatetime
-    filename: str
+    filename: Annotated[str, Len(min_length=1)]
 
 
 class Config(BaseModel):

@@ -72,13 +72,14 @@ def new(
 
     dates += [(last_day + timedelta(days=(i + 1))).strftime("%Y%m%d") for i in range(0, max_days - len(dates))]
 
+    ret = 0
     for date, image in zip(dates, images, strict=True):
-        new_image(
+        ret += new_image(
             new_date=date,
             new_image=image,
             config_file=config_file,
         )
-    return 0
+    return ret
 
 
 def new_image(
@@ -94,46 +95,43 @@ def new_image(
     if conf is None:
         return 1
 
+    date_to_add = Date.model_validate({"day": new_date, "filename": os.path.basename(new_image)})
+
     # Detect if a date or image has been used before
     for date in conf.dates:
-        if date.day == new_date:
-            logger.error(f"already have an image for {new_date}")
+        if date.day == date_to_add.day:
+            logger.error(f"already have an image for {date_to_add.day}")
             return 1
-        if new_image and date.filename == new_image:
-            logger.error(f"{new_image} was already used on {date.day}")
+        if date.filename == date_to_add.filename:
+            logger.error(f"{date_to_add.filename} was already used on {new_date}")
             return 1
 
-    # Move the image
-    new_image = os.path.basename(new_image)
-
-    old_image_path = os.path.join(config.UNUSED_IMAGES, new_image)
+    old_image_path = os.path.join(config.UNUSED_IMAGES, date_to_add.filename)
     if not os.path.exists(old_image_path):
         logger.error(f"{old_image_path} does not exist")
         return 1
-    new_image_path = os.path.join(config.IMAGES, new_image)
+    new_image_path = os.path.join(config.IMAGES, date_to_add.filename)
     logger.info(f"Moving {old_image_path} to {new_image_path}")
     shutil.move(old_image_path, new_image_path)
 
     # Try to move the metadata file
     old_metadata_file = get_metadata_filename(
         config.UNUSED_METADATA,
-        new_image,
+        date_to_add.filename,
     )
     if os.path.exists(old_metadata_file):
         new_metadata_file = get_metadata_filename(
             config.METADATA_DIR,
-            new_image,
+            date_to_add.filename,
         )
         logger.info(f"Moving {old_metadata_file} to {new_metadata_file}")
         shutil.move(old_metadata_file, new_metadata_file)
     else:
         logger.warning(f"{old_metadata_file} does not exist, no need to move")
 
-    conf.dates.append(
-        Date.model_validate({"day": new_date, "filename": new_image}),
-    )
+    conf.dates.append(date_to_add)
     logger.info(f"Writing {config_file}")
     config.write_config(config_file, conf)
 
-    logger.info(f"Added {new_date}: {new_image}")
+    logger.info(f"Added {new_date}: {date_to_add.filename}")
     return 0
