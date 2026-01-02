@@ -16,6 +16,9 @@ dailyphoto = "dailyphoto:cli.main"
 [tool.uv]
 package = true
 
+[tool.setuptools.package-data]
+"dailyphoto" = ["resources/*", ]
+
 [dependency-groups]
 dev = [
   "mypy",
