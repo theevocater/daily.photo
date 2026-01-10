@@ -240,6 +240,9 @@ def generate(*, conf: Config, tar: bool) -> int:
     dates = conf.dates
     month = MonthlyTemplate(month=dates[0].day)
     for i, date in enumerate(dates):
+        if date.day.date() > datetime.date.today():
+            break
+
         today = date.day
         curr_month = datetime.datetime(year=today.year, month=today.month, day=1)
         if curr_month != month.month:

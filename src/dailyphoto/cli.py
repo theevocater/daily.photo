@@ -64,7 +64,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     sp = subparsers.add_parser(
         "queue",
-        help="Queue new images",
+        help="Add an entire directory of images",
     )
     sp.add_argument(
         "source_dir",
@@ -125,6 +125,7 @@ def main(argv: list[str] | None = None) -> int:
     elif args.function == "queue":
         return queue_images(
             conf=conf,
+            config_file=args.config_file,
             source_dir=args.source_dir,
         )
     elif args.function == "exif":

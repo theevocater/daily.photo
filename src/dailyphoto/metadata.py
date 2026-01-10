@@ -113,9 +113,8 @@ def metadata(
     id = kitty.new_window()
     kitty.set_layout("horizontal")
 
-    output_dir = source_dir
-    image_dir = os.path.join(output_dir, "images")
-    metadata_dir = os.path.join(output_dir, "metadata")
+    image_dir = os.path.join(source_dir, "images")
+    metadata_dir = os.path.join(source_dir, "metadata")
     rets = 0
 
     for date in conf.dates:
