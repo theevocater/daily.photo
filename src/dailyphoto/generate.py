@@ -240,9 +240,6 @@ def generate(*, conf: Config, tar: bool) -> int:
     dates = conf.dates
     month = MonthlyTemplate(month=dates[0].day)
     for i, date in enumerate(dates):
-        if date.day.date() > datetime.date.today():
-            break
-
         today = date.day
         curr_month = datetime.datetime(year=today.year, month=today.month, day=1)
         if curr_month != month.month:
@@ -262,26 +259,12 @@ def generate(*, conf: Config, tar: bool) -> int:
         else:
             prev_day = dates[i - 1].day
 
-        if i == len(dates) - 1:
+        is_last = (i == len(dates) - 1) or (dates[i + 1].day.date() > datetime.date.today())
+
+        if is_last:
             next_day = today
         else:
             next_day = dates[i + 1].day
-
-        if i == len(dates) - 1:
-            # Last day we need to generate the index and no anchor
-            generate_day(
-                env=env,
-                conf=conf,
-                prev_day=prev_day,
-                current_day=today,
-                next_day=next_day,
-                image=date.filename,
-                index=True,
-                metadata_file=metadata_file,
-                output_dir=OUTPUT_DIR,
-                rss_feed=rss_feed,
-                month=month,
-            )
 
         generate_day(
             env=env,
@@ -296,6 +279,23 @@ def generate(*, conf: Config, tar: bool) -> int:
             rss_feed=rss_feed,
             month=month,
         )
+
+        if is_last:
+            # Last day we need to generate the index and no anchor
+            generate_day(
+                env=env,
+                conf=conf,
+                prev_day=prev_day,
+                current_day=today,
+                next_day=next_day,
+                image=date.filename,
+                index=True,
+                metadata_file=metadata_file,
+                output_dir=OUTPUT_DIR,
+                rss_feed=rss_feed,
+                month=month,
+            )
+            break
 
     # Write out the final month
     month.write(env)
