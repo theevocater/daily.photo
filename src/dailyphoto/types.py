@@ -9,7 +9,7 @@ from pydantic import PlainSerializer
 
 ShortDatetime = Annotated[
     datetime,
-    BeforeValidator(lambda ds: datetime.strptime(ds, "%Y%m%d")),
+    BeforeValidator(lambda ds: datetime.strptime(ds, "%Y%m%d") if isinstance(ds, str) else ds),
     PlainSerializer(lambda dt: dt.strftime("%Y%m%d") if dt else ""),
 ]
 

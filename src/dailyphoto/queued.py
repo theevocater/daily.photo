@@ -1,11 +1,17 @@
 import logging
 import os
 import shutil
+from datetime import datetime
+from datetime import timedelta
 
-from .config import UNUSED
-from .config import UNUSED_IMAGES
-from .config import UNUSED_METADATA
+from dailyphoto import kitty
+from dailyphoto.metadata import update
+from dailyphoto.types import Date
+
+from .config import IMAGES
+from .config import METADATA_DIR
 from .config import Config
+from .config import write_config
 
 logger = logging.getLogger(__name__)
 
@@ -15,45 +21,60 @@ def unused(conf: Config, new_image: str) -> bool:
         if date.filename == new_image:
             logger.error(f"{date.filename} is already used on {date.day}")
             return False
-        if os.path.exists(os.path.join(UNUSED_IMAGES, new_image)):
-            logger.error(f"{new_image} is already in {UNUSED_IMAGES}")
-            return False
     return True
 
 
-def move(
-    source_dir: str,
-    name: str,
+def queue_image(
+    *,
+    new_date: datetime,
+    new_image: os.DirEntry,
+    conf: Config,
+    config_file: str,
 ) -> int:
-    _, ext = os.path.splitext(name)
-    if ext != ".jpg":
-        return 0
-    logger.info(f"Moving {source_dir}/{name} to {UNUSED_IMAGES}/{name}")
-    shutil.move(
-        os.path.join(source_dir, name),
-        os.path.join(UNUSED_IMAGES, name),
-    )
+    date_to_add = Date.model_validate({"day": new_date, "filename": new_image.name})
 
+    final_path = os.path.join(IMAGES, date_to_add.filename)
+
+    logger.info(f"Moving {new_image.path} to {final_path}")
+    shutil.move(new_image.path, final_path)
+
+    conf.dates.append(date_to_add)
+
+    logger.info(f"Writing {config_file}")
+    write_config(config_file, conf)
     return 0
 
 
-def queue_images(*, conf: Config, source_dir: str) -> int:
+def queue_images(*, conf: Config, config_file: str, source_dir: str) -> int:
     if not os.path.exists(source_dir):
         logger.error(f"Error: unable to list {source_dir}")
         return 1
 
-    if not os.path.exists(UNUSED):
-        os.mkdir(UNUSED)
-    if not os.path.exists(UNUSED_IMAGES):
-        os.mkdir(UNUSED_IMAGES)
-    if not os.path.exists(UNUSED_METADATA):
-        os.mkdir(UNUSED_METADATA)
-
-    with os.scandir(source_dir) as it:
-        for entry in it:
+    id = kitty.new_window()
+    kitty.set_layout("horizontal")
+    with os.scandir(source_dir) as entries:
+        date = conf.dates[-1].day
+        for entry in entries:
             if entry.is_file() and unused(conf, entry.name):
-                ret = move(source_dir, entry.name)
+                date = date + timedelta(days=(1))
+                ret = queue_image(
+                    new_date=date,
+                    new_image=entry,
+                    conf=conf,
+                    config_file=config_file,
+                )
                 if ret != 0:
                     return ret
+
+                prefix, _ = os.path.splitext(entry.name)
+                ret += update(
+                    os.path.join(IMAGES, entry.name),
+                    os.path.join(METADATA_DIR, prefix + os.path.extsep + "json"),
+                    True,
+                    id,
+                )
+    kitty.close_window(id)
+    logger.info(f"Writing {config_file}")
+    write_config(config_file, conf)
 
     return 0

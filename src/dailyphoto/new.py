@@ -5,8 +5,11 @@ import shutil
 from datetime import datetime
 from datetime import timedelta
 
+from dailyphoto import kitty
+
 from . import config
 from .metadata import get_metadata_filename
+from .metadata import update
 from .types import Date
 
 logger = logging.getLogger(__name__)
@@ -73,12 +76,23 @@ def new(
     dates += [(last_day + timedelta(days=(i + 1))).strftime("%Y%m%d") for i in range(0, max_days - len(dates))]
 
     ret = 0
+    id = kitty.new_window()
+    kitty.set_layout("horizontal")
     for date, image in zip(dates, images, strict=True):
         ret += new_image(
             new_date=date,
             new_image=image,
             config_file=config_file,
         )
+        base = os.path.basename(image)
+        prefix, _ = os.path.splitext(base)
+        ret += update(
+            os.path.join(config.IMAGES, base),
+            os.path.join(config.METADATA_DIR, prefix + os.path.extsep + "json"),
+            True,
+            id,
+        )
+    kitty.close_window(id)
     return ret
 
 
