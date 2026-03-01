@@ -55,7 +55,8 @@ def queue_images(*, conf: Config, config_file: str, source_dir: str) -> int:
     with os.scandir(source_dir) as entries:
         date = conf.dates[-1].day
         for entry in entries:
-            if entry.is_file() and unused(conf, entry.name):
+            _, ext = os.path.splitext(entry.name)
+            if entry.is_file() and ext.lower() in (".png", ".jpg") and unused(conf, entry.name):
                 date = date + timedelta(days=(1))
                 ret = queue_image(
                     new_date=date,

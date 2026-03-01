@@ -21,7 +21,9 @@ def read_config(config_file: str) -> Config | None:
     try:
         with open(config_file) as c:
             parsed = json.load(c)
-            return Config.model_validate(parsed)
+            config = Config.model_validate(parsed)
+            config.dates.sort(key=lambda d: d.day)
+            return config
 
     except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
         logger.error(f"Unable to load config_file: {config_file}. {e}")
@@ -30,6 +32,7 @@ def read_config(config_file: str) -> Config | None:
 
 def write_config(config_file: str, config: Config) -> None:
     try:
+        config.dates.sort(key=lambda d: d.day)
         with open(config_file, "w") as c:
             c.write(config.model_dump_json(indent=2))
             # include a final line ending
