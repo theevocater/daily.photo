@@ -1,5 +1,6 @@
 import logging
 import os
+import random
 import shutil
 from datetime import datetime
 from datetime import timedelta
@@ -52,7 +53,9 @@ def queue_images(*, conf: Config, config_file: str, source_dir: str) -> int:
 
     id = kitty.new_window()
     kitty.set_layout("horizontal")
-    with os.scandir(source_dir) as entries:
+    with os.scandir(source_dir) as e:
+        entries = list(e)
+        random.shuffle(entries)
         date = conf.dates[-1].day
         for entry in entries:
             _, ext = os.path.splitext(entry.name)
