@@ -1,10 +1,14 @@
+import functools
+import http.server
 import logging
+import threading
 import time
 
 from watchdog.events import FileSystemEvent
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
+from . import config as cfg
 from .generate import generate
 from .types import Config
 
@@ -28,14 +32,28 @@ class WatchHandler(FileSystemEventHandler):
             logger.debug(f"Skipping event {event} (rate limited)")
 
 
+def serve() -> None:
+    port = 8000
+    print(f"Serving {cfg.OUTPUT_DIR}/ at http://localhost:{port}")
+    httpd = http.server.HTTPServer(
+        ("", port), functools.partial(http.server.SimpleHTTPRequestHandler, directory=cfg.OUTPUT_DIR)
+    )
+    httpd.serve_forever()
+
+
 def watch(*, conf: Config, path: str) -> int:
+    # Generate once to ensure some files exist before serving
+    generate(conf=conf, tar=False)
+
+    server_thread = threading.Thread(target=serve, daemon=True)
+    server_thread.start()
+
     event_handler = WatchHandler(conf)
     observer = Observer()
     observer.schedule(event_handler, path, recursive=True)
     observer.start()
     try:
-        while True:
-            time.sleep(1)
+        observer.join()
     except KeyboardInterrupt:
         observer.stop()
         observer.join()
